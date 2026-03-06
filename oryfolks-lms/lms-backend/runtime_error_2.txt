@@ -1,0 +1,45 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.oryfolks:lms-backend >----------------------
+[INFO] Building lms-backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ lms-backend ---
+[INFO] Deleting C:\Users\Lenovo\Downloads\oryfolks-lms\lms-backend\target
+[INFO] 
+[INFO] >>> spring-boot:3.2.2:run (default-cli) > test-compile @ lms-backend >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ lms-backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ lms-backend ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 49 source files with javac [debug release 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/Lenovo/Downloads/oryfolks-lms/lms-backend/src/main/java/com/oryfolks/lms_backend/controller/ManagerController.java:[54,23] cannot find symbol
+  symbol:   method assignCourseToEmployees(com.oryfolks.lms_backend.DTO.AssignCourseRequest)
+  location: variable managerService of type com.oryfolks.lms_backend.service.ManagerService
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.399 s
+[INFO] Finished at: 2026-02-14T12:04:47+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project lms-backend: Compilation failure
+[ERROR] /C:/Users/Lenovo/Downloads/oryfolks-lms/lms-backend/src/main/java/com/oryfolks/lms_backend/controller/ManagerController.java:[54,23] cannot find symbol
+[ERROR]   symbol:   method assignCourseToEmployees(com.oryfolks.lms_backend.DTO.AssignCourseRequest)
+[ERROR]   location: variable managerService of type com.oryfolks.lms_backend.service.ManagerService
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

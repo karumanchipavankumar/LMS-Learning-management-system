@@ -1,0 +1,591 @@
+/* Course Player Layout */
+.course-player-container {
+    min-height: 100vh;
+    background-color: #fff7ed;
+    /* Warm off-white background */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.cp-header {
+    background-color: transparent;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cp-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cp-course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cp-home-icon {
+    font-size: 24px;
+    color: #000;
+    cursor: pointer;
+    background: #000;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cp-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Progress Button */
+.cp-progress-btn {
+    background-color: #2C3E50;
+    color: white;
+    padding: 6px 20px;
+    border-radius: 20px;
+    border: none;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cp-progress-btn:hover {
+    background-color: #34495e;
+    transform: translateY(-1px);
+}
+
+/* Progress Circle and track removed as they are no longer used */
+
+.cp-progress-text {
+    display: none;
+}
+
+/* Progress Popup */
+.cp-progress-popup {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 1000;
+    min-width: 180px;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: popupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cp-popup-arrow {
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: rgba(30, 41, 59, 0.95);
+    transform: rotate(45deg);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cp-popup-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.cp-popup-percent {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-popup-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.cp-popup-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.cp-popup-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #81C784);
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+}
+
+.cp-progress-btn.completed {
+    background-color: #059669;
+    /* Green-600 */
+}
+
+.cp-progress-btn.completed:hover {
+    background-color: #047857;
+    /* Green-700 */
+}
+
+.cp-progress-btn.completed .cp-progress-circle-fill {
+    stroke: #ffffff;
+    /* White stroke for better contrast on green */
+}
+
+.cp-progress-btn.completed .cp-progress-circle-track {
+    stroke: rgba(255, 255, 255, 0.3);
+}
+
+.cp-profile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.cp-profile-circle {
+    width: 40px;
+    height: 40px;
+    background-color: #2C3E50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.cp-profile-circle:hover {
+    background-color: #34495e;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cp-profile-circle:active {
+    transform: scale(0.98);
+}
+
+/* Profile Dropdown */
+.cp-profile-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1000;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cp-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cp-dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.cp-dropdown-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    color: #555;
+}
+
+.cp-dropdown-item:hover .cp-dropdown-icon {
+    color: #3B82F6;
+}
+
+/* Main Content Grid */
+.cp-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 24px;
+    padding: 0 24px 24px 24px;
+    flex: 1;
+    height: calc(100vh - 80px);
+    max-height: calc(100vh - 80px);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Left Column - Main Content */
+.cp-left-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-right: -8px;
+}
+
+/* Video Container */
+.cp-video-container {
+    background-color: white;
+    border: 2px solid #3B82F6;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 24px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: white;
+    min-height: 450px;
+    flex-shrink: 0;
+}
+
+/* Video Placeholder */
+.cp-placeholder-video {
+    text-align: center;
+    padding: 40px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+}
+
+.cp-placeholder-video svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 24px;
+    color: #3B82F6;
+}
+
+.cp-placeholder-video h2 {
+    font-size: 24px;
+    color: #1E293B;
+    margin: 16px 0 0 0;
+    font-weight: 600;
+}
+
+/* Content Section */
+.cp-content-section {
+    padding: 0 0 24px 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    position: relative;
+}
+
+/* Content wrapper */
+.cp-content-scrollable {
+    width: 100%;
+    padding-bottom: 40px;
+}
+
+/* Custom scrollbar for left column */
+.cp-left-col::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cp-left-col::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.cp-left-col::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.cp-left-col::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.cp-course-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 12px;
+}
+
+/* Tabs Bar */
+.cp-tabs-bar {
+    background-color: #1E293B;
+    /* Dark Blue */
+    display: flex;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.cp-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.cp-tab:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cp-tab.active {
+    color: white;
+    background-color: #2C3E50;
+    /* Slightly lighter active state or just standard */
+    position: relative;
+}
+
+.cp-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #EF4444;
+    /* Red dot */
+    border-radius: 50%;
+    margin-bottom: 4px;
+}
+
+.cp-tab-content {
+    background-color: #E2E8F0;
+    padding: 24px;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Right Sidebar (Course Content) */
+.cp-sidebar {
+    background-color: #1E293B;
+    border-radius: 12px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 4px solid #DFD7D0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Sidebar content container */
+.cp-sidebar-content {
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 20px;
+}
+
+/* Custom scrollbar for sidebar */
+.cp-sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cp-sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cp-sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.cp-sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.cp-sidebar-header {
+    padding: 16px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cp-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cp-section-header {
+    padding: 16px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cp-section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #F3F4F6;
+}
+
+.cp-section-meta {
+    font-size: 11px;
+    color: #9CA3AF;
+    margin-top: 4px;
+}
+
+.cp-lesson-list {
+    background-color: #1E293B;
+}
+
+.cp-lesson-item {
+    transition: background-color 0.2s;
+    border-left: 4px solid transparent;
+}
+
+.cp-lesson-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cp-lesson-item.active {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+    border-left-color: #3B82F6;
+}
+
+.cp-lesson-title {
+    font-size: 14px;
+    color: #ffffff;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.cp-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background-color: transparent;
+}
+
+.cp-lesson-item.completed .cp-checkbox {
+    background-color: #10B981;
+    /* Green-500 */
+    border-color: #10B981;
+}
+
+.cp-lesson-duration {
+    display: none;
+    /* Hide Module X text as requested */
+}
+
+@media (max-width: 1400px) {
+
+    .cp-video-container,
+    .cp-content-section {
+        max-width: 1000px;
+    }
+
+    .cp-video-container {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 1200px) {
+
+    .cp-video-container,
+    .cp-content-section {
+        max-width: 800px;
+    }
+
+    .cp-video-container {
+        min-height: 380px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cp-main-grid {
+        grid-template-columns: 1fr;
+        padding: 0 16px 24px 16px;
+    }
+
+    .cp-video-container {
+        max-width: 100%;
+        margin: 0 0 24px 0;
+        min-height: 350px;
+    }
+
+    .cp-content-section {
+        max-width: 100%;
+        padding-right: 0;
+    }
+
+    .cp-left-col {
+        padding-right: 0;
+        margin-right: 0;
+    }
+}

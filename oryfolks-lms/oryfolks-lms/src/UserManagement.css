@@ -1,0 +1,205 @@
+.user-management-container {
+    padding: 24px;
+    background-color: white;
+    width: 100%;
+    min-height: 85vh;
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #F3F4F6;
+    transition: all 0.3s ease;
+}
+
+.user-management-container:hover {
+    border-color: #6366F1;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.um-header {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.um-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 8px;
+}
+
+.um-subtitle {
+    font-size: 14px;
+    color: #6B7280;
+}
+
+/* Filter Bar */
+.um-filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.um-search-group {
+    position: relative;
+    width: 300px;
+}
+
+.um-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    width: 16px;
+    height: 16px;
+}
+
+.um-search-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+}
+
+.um-filters {
+    display: flex;
+    gap: 12px;
+}
+
+.um-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    background: white;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.um-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.um-export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    background: white;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+}
+
+.um-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: #1E293B;
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Table */
+.um-table-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* Keep shadow as it adds depth */
+    overflow-x: auto;
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+}
+
+.um-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.um-table th {
+    background-color: #2C3E50;
+    color: white;
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.um-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #E5E7EB;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #374151;
+}
+
+.um-table tr:last-child td {
+    border-bottom: none;
+}
+
+.um-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.um-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.um-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.um-action-cell {
+    display: flex;
+    gap: 12px;
+}
+
+.um-action-icon {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    color: #6B7280;
+    transition: color 0.2s;
+}
+
+.um-action-icon:hover {
+    color: #2C3E50;
+}
+
+.um-action-icon.delete {
+    color: #EF4444;
+}
+
+.um-action-icon.delete:hover {
+    color: #DC2626;
+}

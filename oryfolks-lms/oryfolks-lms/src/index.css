@@ -1,0 +1,53 @@
+/* Default styles cleared for Login Page project */
+body {
+    background-color: #fff7ed;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Ensuring font consistency too while here */
+    margin: 0;
+    padding: 0;
+}
+
+/* Global Back Arrow Style */
+.back-arrow-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    color: #4B5563;
+    transition: color 0.2s;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.back-arrow-icon:hover {
+    color: #1F2937;
+}
+
+/* Global Centered Header Container Helper */
+.header-with-arrow {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+/* Validation Styles */
+.error-text {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.input-field.error,
+.add-user-input.error,
+.add-user-select.error,
+.add-course-input.error,
+.add-course-select.error,
+.add-course-textarea.error,
+.form-input.error {
+    border-color: #ef4444 !important;
+}

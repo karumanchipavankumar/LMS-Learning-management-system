@@ -1,0 +1,228 @@
+.course-management-container {
+    padding: 24px;
+    background-color: white;
+    width: 100%;
+    min-height: 90vh;
+    padding-bottom: 60px;
+    /* Increased height and bottom padding */
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #F3F4F6;
+    transition: all 0.3s ease;
+}
+
+/* Standalone Page Layout Wrapper */
+.standalone-page-layout {
+    min-height: 100vh;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* Align to top so it doesn't center vertically if short */
+}
+
+/* Ensure container fits well inside layout */
+.standalone-page-layout .course-management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.course-management-container:hover {
+    border-color: #6366F1;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.cm-header-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 24px;
+    text-align: center;
+    /* Center title */
+    position: relative;
+    /* To allow absolute positioning if needed inside header area */
+}
+
+.cm-back-arrow {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    color: #4B5563;
+    transition: color 0.2s;
+    z-index: 10;
+}
+
+.cm-back-arrow:hover {
+    color: #1F2937;
+}
+
+/* Toolbar */
+.cm-toolbar {
+    display: flex;
+    justify-content: center;
+    /* Center content */
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+    /* For absolute positioning of buttons */
+    /* flex-wrap: wrap; Removed wrap to enforce structure */
+    min-height: 48px;
+}
+
+.cm-new-course-btn {
+    background-color: transparent;
+    /* ... existing styles ... */
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #10B981;
+    /* Green color from image */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+.cm-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end;
+    /* Push to right based on image */
+}
+
+.cm-select {
+    padding: 8px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 4px;
+    color: #4B5563;
+    background-color: white;
+    min-width: 120px;
+    cursor: pointer;
+}
+
+.cm-search-container {
+    position: relative;
+    width: 500px;
+    /* Increased size */
+    max-width: 100%;
+}
+
+.cm-search-input {
+    width: 100%;
+    padding: 14px 48px 14px 24px;
+    /* Increased padding, right padding for icon */
+    border: 2px solid #E5E7EB;
+    /* Bright border */
+    border-radius: 9999px;
+    /* Curve shaped (Pill) */
+    font-size: 16px;
+    outline: none;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    /* Bright/Lifted look */
+    transition: all 0.2s ease;
+}
+
+.cm-search-input:focus {
+    border-color: #3B82F6;
+    /* Bright focus color */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.cm-search-icon {
+    position: absolute;
+    right: 20px;
+    /* Adjusted for pill shape */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    width: 20px;
+    /* Slightly larger icon */
+    height: 20px;
+}
+
+/* Table */
+.cm-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cm-table th {
+    text-align: left;
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    background-color: #2C3E50;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.cm-table td {
+    padding: 20px 16px;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 14px;
+    color: #4B5563;
+    vertical-align: middle;
+}
+
+.cm-table tr:last-child td {
+    border-bottom: none;
+}
+
+.cm-course-name {
+    font-weight: 500;
+    color: #2C3E50;
+    /* Dark blue-ish */
+    text-transform: uppercase;
+    /* Looks uppercase in image */
+}
+
+.cm-lessons-link {
+    color: #3B82F6;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.cm-action-link {
+    color: #3B82F6;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-right: 16px;
+    font-size: 13px;
+}
+
+.cm-edit-btn {
+    background-color: #1F2937;
+    /* Dark button */
+    color: white;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.cm-table-container {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+}

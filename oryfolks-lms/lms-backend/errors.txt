@@ -1,0 +1,107 @@
+﻿
+> [ERROR] COMPILATION 
+ERROR : 
+  [INFO] -----------------
+--------------------------
+------------------
+> [ERROR] /C:/Users/Lenovo
+/Downloads/oryfolks-lms/lm
+s-backend/src/main/java/co
+m/oryfolks/lms_backend/ser
+vice/ManagerServiceImpl.ja
+va:[46,37] no suitable 
+constructor found for Assi
+gnedCourseDTO(java.lang.Lo
+ng,java.lang.String,int,ja
+va.time.LocalDate)
+      constructor com.oryf
+olks.lms_backend.DTO.Assig
+nedCourseDTO.AssignedCours
+eDTO(java.lang.Long,java.l
+ang.String,java.lang.Strin
+g,java.time.LocalDate,java
+.lang.String) is not 
+applicable
+        (actual and 
+formal argument lists 
+differ in length)
+      constructor com.oryf
+olks.lms_backend.DTO.Assig
+nedCourseDTO.AssignedCours
+eDTO() is not applicable
+        (actual and 
+formal argument lists 
+differ in length)
+> [INFO] 1 error
+  [INFO] -----------------
+--------------------------
+------------------
+  [INFO] -----------------
+--------------------------
+--------------------------
+---
+  [INFO] BUILD FAILURE
+  [INFO] -----------------
+--------------------------
+--------------------------
+---
+  [INFO] Total time:  
+9.849 s
+> [ERROR] Failed to 
+execute goal org.apache.ma
+ven.plugins:maven-compiler
+-plugin:3.11.0:compile 
+(default-compile) on 
+project lms-backend: 
+Compilation failure
+> [ERROR] /C:/Users/Lenovo
+/Downloads/oryfolks-lms/lm
+s-backend/src/main/java/co
+m/oryfolks/lms_backend/ser
+vice/ManagerServiceImpl.ja
+va:[46,37] no suitable 
+constructor found for Assi
+gnedCourseDTO(java.lang.Lo
+ng,java.lang.String,int,ja
+va.time.LocalDate)
+> [ERROR]     constructor 
+com.oryfolks.lms_backend.D
+TO.AssignedCourseDTO.Assig
+nedCourseDTO(java.lang.Lon
+g,java.lang.String,java.la
+ng.String,java.time.LocalD
+ate,java.lang.String) is 
+not applicable
+> [ERROR]       (actual 
+and formal argument lists 
+differ in length)
+> [ERROR]     constructor 
+com.oryfolks.lms_backend.D
+TO.AssignedCourseDTO.Assig
+nedCourseDTO() is not 
+applicable
+> [ERROR]       (actual 
+and formal argument lists 
+differ in length)
+> [ERROR] 
+> [ERROR] -> [Help 1]
+> [ERROR] 
+> [ERROR] To see the full 
+stack trace of the 
+errors, re-run Maven with 
+the -e switch.
+> [ERROR] Re-run Maven 
+using the -X switch to 
+enable full debug logging.
+> [ERROR] 
+> [ERROR] For more 
+information about the 
+errors and possible 
+solutions, please read 
+the following articles:
+> [ERROR] [Help 1] http://
+cwiki.apache.org/confluenc
+e/display/MAVEN/MojoFailur
+eException
+
+
