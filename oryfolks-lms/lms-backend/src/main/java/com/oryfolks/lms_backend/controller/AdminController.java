@@ -62,10 +62,12 @@ public class AdminController {
                         long pendingCount = publishedCount - assignedCount;
 
                         List<com.oryfolks.lms_backend.entity.EmployeeCourse> recentAssignments = employeeCourseRepository
-                                        .findTop6ByOrderByIdDesc();
+                                        .findAllByOrderByIdDesc();
 
                         List<com.oryfolks.lms_backend.DTO.RecentAssignmentDTO> recentDTOs = recentAssignments.stream()
                                         .map(this::mapToRecentAssignmentDTO)
+                                        .filter(dto -> dto != null && dto.getEmployeeName() != null && !dto.getEmployeeName().trim().isEmpty())
+                                        .limit(6)
                                         .collect(java.util.stream.Collectors.toList());
 
                         long totalMembersCount = userRepository.countByRoleNot("ADMIN");
@@ -108,6 +110,7 @@ public class AdminController {
 
                 List<com.oryfolks.lms_backend.DTO.RecentAssignmentDTO> dtos = allRecent.stream()
                                 .map(this::mapToRecentAssignmentDTO)
+                                .filter(dto -> dto != null && dto.getEmployeeName() != null && !dto.getEmployeeName().trim().isEmpty())
                                 .collect(java.util.stream.Collectors.toList());
 
                 return ResponseEntity.ok(dtos);
@@ -126,16 +129,28 @@ public class AdminController {
                 // Fetch User Profile for name
                 com.oryfolks.lms_backend.entity.UserProfile profile = userProfileRepository
                                 .findByUserId(ec.getEmployeeId())
-                                .orElse(new com.oryfolks.lms_backend.entity.UserProfile());
+                                .orElse(null);
 
-                String employeeName = (profile.getFirstName() != null ? profile.getFirstName() : "")
-                                + " " +
-                                (profile.getLastName() != null ? profile.getLastName() : "");
+                if (profile == null) {
+                        return null; // Exclude if no employee profile exists
+                }
+
+                String firstName = profile.getFirstName() != null ? profile.getFirstName().trim() : "";
+                String lastName = profile.getLastName() != null ? profile.getLastName().trim() : "";
+                
+                if (firstName.equalsIgnoreCase("null")) firstName = "";
+                if (lastName.equalsIgnoreCase("null")) lastName = "";
+
+                String employeeName = (firstName + " " + lastName).trim();
+
+                if (employeeName.isEmpty() || employeeName.equals("-")) {
+                        return null; // Exclude if employee name is entirely blank or just a dash
+                }
 
                 return new com.oryfolks.lms_backend.DTO.RecentAssignmentDTO(
                                 ec.getCourseId(),
                                 course.getTitle(),
-                                employeeName.trim());
+                                employeeName);
         }
 
         @GetMapping("/assigned-courses")

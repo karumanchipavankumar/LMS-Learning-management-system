@@ -19,6 +19,10 @@ const CoursePlayer = () => {
     const videoRef = useRef(null);
     const [resumeTimeSet, setResumeTimeSet] = useState(false);
 
+    // Strict Tracking Refs
+    const furthestWatchedTime = useRef(0);
+    const lastTimeRef = useRef(0);
+
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -42,9 +46,30 @@ const CoursePlayer = () => {
 
     // Resume video logic
     useEffect(() => {
-        if (course && course.lastWatchedTimestamp && videoRef.current && !resumeTimeSet) {
-            videoRef.current.currentTime = course.lastWatchedTimestamp;
+        if (course && videoRef.current && !resumeTimeSet) {
+            const initialTime = course.lastWatchedTimestamp || 0;
+            videoRef.current.currentTime = initialTime;
             setResumeTimeSet(true);
+
+            // Determine maximum permitted scrub point based on completed modules
+            let startOfUncompleted = 0;
+            if (course.contents && course.contents.length > 0) {
+                let foundUncompleted = false;
+                for (let i = 0; i < course.contents.length; i++) {
+                    if (!course.contents[i].completed) {
+                        startOfUncompleted = course.contents[i].timestamp;
+                        foundUncompleted = true;
+                        break;
+                    }
+                }
+                // If all completed, allow full access
+                if (!foundUncompleted) {
+                    startOfUncompleted = videoRef.current.duration || 999999;
+                }
+            }
+
+            furthestWatchedTime.current = Math.max(initialTime, startOfUncompleted);
+            lastTimeRef.current = initialTime;
         }
     }, [course, resumeTimeSet]);
 
@@ -139,7 +164,20 @@ const CoursePlayer = () => {
     const handleTimeUpdate = (e) => {
         const video = e.target;
         if (video.duration) {
-            const currentProgress = Math.round((video.currentTime / video.duration) * 100);
+            let currentProgress = Math.round((video.currentTime / video.duration) * 100);
+
+            // TRACKING FURTHEST CONTIGUOUS TIME
+            if (video.currentTime <= furthestWatchedTime.current + 1.5) {
+                furthestWatchedTime.current = Math.max(furthestWatchedTime.current, video.currentTime);
+            }
+            lastTimeRef.current = video.currentTime;
+
+            // Strict Capping: Preclude 100% course progress if they scrubbed to the end
+            if (currentProgress >= 100) {
+                if (furthestWatchedTime.current < video.duration - 1.0) {
+                    currentProgress = 99;
+                }
+            }
 
             // Existing progress update logic
             const now = Date.now();
@@ -156,9 +194,14 @@ const CoursePlayer = () => {
                     const nextItem = course.contents[index + 1];
                     const endTime = nextItem ? nextItem.timestamp : video.duration;
 
-                    // Mark as completed if user has watched up to or past the end of this segment
-                    // We use a small tolerance but generally if they are at or past the endTime
-                    if (video.currentTime >= endTime - 0.5) {
+                    // STRICT REQUIREMENTS:
+                    // 1. Preceding modules must be completed locally OR this is the 1st module.
+                    const isEligible = index === 0 || course.contents[index - 1].completed;
+
+                    // 2. The user has naturally watched up to the end of THIS module without jumping forward.
+                    const hasWatchedToEnd = furthestWatchedTime.current >= (endTime - 0.5);
+
+                    if (isEligible && hasWatchedToEnd) {
                         markContentCompleted(item.id);
                     }
                 });
@@ -167,13 +210,33 @@ const CoursePlayer = () => {
     };
 
     const handleVideoEnded = () => {
+        let isFullyCompleted = true;
+
         if (course.contents && course.contents.length > 0) {
             const lastItem = course.contents[course.contents.length - 1];
+            const isEligible = course.contents.length === 1 || course.contents[course.contents.length - 2].completed;
+            const hasWatchedToEnd = furthestWatchedTime.current >= (videoRef.current ? videoRef.current.duration - 1.0 : 0);
+
             if (!lastItem.completed) {
-                markContentCompleted(lastItem.id);
+                if (isEligible && hasWatchedToEnd) {
+                    markContentCompleted(lastItem.id);
+                } else {
+                    isFullyCompleted = false; // Failed strict tracking
+                }
+            } else {
+                // If the last module is legitimately already completed, the user already finished the course previously.
+            }
+        } else {
+            if (furthestWatchedTime.current < (videoRef.current ? videoRef.current.duration - 1.0 : 0)) {
+                isFullyCompleted = false;
             }
         }
-        updateProgress(100, videoRef.current ? videoRef.current.duration : 0);
+
+        if (isFullyCompleted) {
+            updateProgress(100, videoRef.current ? videoRef.current.duration : 0);
+        } else {
+            updateProgress(99, videoRef.current ? videoRef.current.currentTime : 0);
+        }
     };
 
     if (loading) return <div style={{ color: 'white', padding: '20px' }}>Loading course...</div>;
@@ -186,20 +249,21 @@ const CoursePlayer = () => {
         <div className="course-player-container" onClick={() => setShowProgressPopup(false)}>
             {/* Header */}
             <header className="cp-header">
-                <div className="cp-header-left header-with-arrow" style={{ paddingLeft: '40px', marginBottom: 0, position: 'relative' }}>
+                <div className="cp-header-left" style={{ display: 'flex', alignItems: 'center', margin: 0, gap: '12px' }}>
                     <div
-                        className="back-arrow-icon"
                         onClick={() => navigate(backPath)}
                         style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: '#1F2937', // Dark color for visibility
+                            position: 'static',
+                            transform: 'none',
+                            flexShrink: 0,
+                            color: '#1F2937',
                             cursor: 'pointer',
                             padding: '8px',
                             borderRadius: '50%',
-                            transition: 'background 0.2s'
+                            transition: 'background 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -209,7 +273,7 @@ const CoursePlayer = () => {
                             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                         </svg>
                     </div>
-                    <h1 className="cp-course-title" style={{ marginLeft: '10px' }}>{course.title}</h1>
+                    <h1 className="cp-course-title" style={{ margin: '0 0 0 12px', fontSize: '20px', lineHeight: '24px' }}>{course.title}</h1>
                 </div>
                 <div className="cp-header-right">
                     <div style={{ position: 'relative' }}>

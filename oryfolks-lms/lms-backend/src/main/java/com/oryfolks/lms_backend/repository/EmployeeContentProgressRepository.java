@@ -11,4 +11,5 @@ import java.util.List;
 public interface EmployeeContentProgressRepository extends JpaRepository<EmployeeContentProgress, Long> {
     Optional<EmployeeContentProgress> findByEmployeeIdAndContentId(Long employeeId, Long contentId);
     List<EmployeeContentProgress> findByEmployeeId(Long employeeId);
+    void deleteByEmployeeId(Long employeeId);
 }

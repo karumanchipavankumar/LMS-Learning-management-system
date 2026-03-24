@@ -38,11 +38,19 @@ public class AdminUserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private com.oryfolks.lms_backend.repository.EmployeeContentProgressRepository employeeContentProgressRepository;
+
     @Transactional
     public void addUser(AddUserForm form) {
 
         if (!form.getPassword().equals(form.getConfirmPassword())) {
             throw new RuntimeException("Passwords do not match");
+        }
+
+        // Email domain validation
+        if (form.getEmail() == null || !form.getEmail().toLowerCase().endsWith("@oryfolks.com")) {
+            throw new RuntimeException("Only @oryfolks.com emails are allowed");
         }
 
         // Save User (Auth)
@@ -126,7 +134,11 @@ public class AdminUserService {
         courseEnrollmentRepository.deleteByEmployeeId(id);
         System.out.println("AdminUserService: Deleted course enrollment requests.");
 
-        // 4. Delete user (cascades to UserProfile via JPA)
+        // 4. Delete employee content progress records (activity records)
+        employeeContentProgressRepository.deleteByEmployeeId(id);
+        System.out.println("AdminUserService: Deleted employee content progress records.");
+
+        // 5. Delete user (cascades to UserProfile via JPA)
         userRepository.deleteById(id);
         System.out.println("AdminUserService: Deleted user and profile record.");
     }

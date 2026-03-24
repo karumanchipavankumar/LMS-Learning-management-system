@@ -37,6 +37,7 @@ const AddUser = () => {
 
         if (!formData.email.trim()) newErrors.email = "Email is required";
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
+        else if (!formData.email.toLowerCase().endsWith("@oryfolks.com")) newErrors.email = "Only @oryfolks.com emails are allowed";
 
         if (!formData.mobile.trim()) newErrors.mobile = "Mobile number is required";
         else if (!/^\d{10}$/.test(formData.mobile)) newErrors.mobile = "Exactly 10 digits required";

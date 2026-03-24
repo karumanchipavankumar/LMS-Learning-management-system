@@ -70,6 +70,11 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Passwords do not match");
         }
 
+        // Email domain validation
+        if (form.getEmail() == null || !form.getEmail().toLowerCase().endsWith("@oryfolks.com")) {
+            throw new RuntimeException("Only @oryfolks.com emails are allowed");
+        }
+
         // Create User (Authentication table)
         User user = new User();
         user.setUsername(form.getUsername());
