@@ -11,6 +11,12 @@ public interface UserService {
 
     void resetPassword(String username, String newPassword);
 
+    void createPasswordResetTokenForUser(String email);
+
+    void validateAndResetPassword(String token, String newPassword);
+
+    void changeUserPassword(String username, String oldPassword, String newPassword);
+
     void addUser(AddUserForm user);
 
     com.oryfolks.lms_backend.entity.UserProfile getProfile(String username);

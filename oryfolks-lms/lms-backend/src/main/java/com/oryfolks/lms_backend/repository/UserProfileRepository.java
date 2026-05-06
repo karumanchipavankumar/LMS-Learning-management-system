@@ -8,4 +8,5 @@ import com.oryfolks.lms_backend.entity.UserProfile;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
     Optional<UserProfile> findByUserId(Long userId);
+    Optional<UserProfile> findByEmail(String email);
 }

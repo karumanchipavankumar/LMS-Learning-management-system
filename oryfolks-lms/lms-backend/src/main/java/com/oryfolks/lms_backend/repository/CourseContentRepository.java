@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface CourseContentRepository extends JpaRepository<CourseContent, Long> {
     List<CourseContent> findByCourseVideoIdOrderByTimestampAsc(Long courseVideoId);
+
+    // Used as a guard to prevent duplicate promotion of legacy contents on every page load
+    long countByCourseVideoId(Long courseVideoId);
 }

@@ -3,13 +3,14 @@ import { Routes, Route, NavLink, useNavigate, useParams, Outlet } from 'react-ro
 import {
     LayoutDashboard, Users, BookOpen, Clock,
     ArrowLeft, Bell, Settings, LogOut, CheckCircle, Search, FileText,
-    Mail, Activity, Trash2
+    Mail, Activity, Trash2, User
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import './ManagerDashboard.css';
 import './CourseManagement.css'; // Import shared styles for pill search
 import logo from './assets/logo.png';
+import ManagerProfile from './ManagerProfile';
 
 // --- Data Context ---
 
@@ -34,8 +35,23 @@ const DataProvider = ({ children }) => {
         }
     };
 
+    const [managerProfile, setManagerProfile] = useState(null);
+
+    const fetchProfile = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:8080/manager/profile", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setManagerProfile(response.data);
+        } catch (err) {
+            console.error("Error fetching manager profile", err);
+        }
+    };
+
     useEffect(() => {
         fetchEmployees();
+        fetchProfile();
     }, []);
 
 
@@ -102,7 +118,7 @@ const DataProvider = ({ children }) => {
     };
 
     return (
-        <DataContext.Provider value={{ teamMembers, courses, assignCourseToMembers, fetchEmployees }}>
+        <DataContext.Provider value={{ teamMembers, courses, assignCourseToMembers, fetchEmployees, managerProfile }}>
             {children}
         </DataContext.Provider>
     );
@@ -117,7 +133,6 @@ const Sidebar = () => {
         { icon: BookOpen, label: 'Assign Courses', path: 'course-management' },
         { icon: CheckCircle, label: 'Course Enrollment', path: 'enrollments' },
         { icon: FileText, label: 'Reports', path: 'reports' },
-        { icon: Settings, label: 'Settings', path: 'settings' },
     ];
 
     return (
@@ -148,17 +163,24 @@ const Sidebar = () => {
 
 const Header = () => {
     const navigate = useNavigate();
+    const { managerProfile } = useData();
+    
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate('/');
     };
 
+    const firstName = managerProfile?.firstName || "Manager";
+
     return (
         <header className="app-header">
             <div>
-                <h1 className="header-title">Welcome, Manager!</h1>
+                <h1 className="header-title">Welcome, {firstName}!</h1>
             </div>
             <div className="header-actions">
+                <button className="icon-btn" onClick={() => navigate('/manager/profile')} title="Profile">
+                    <User size={24} />
+                </button>
                 <button className="icon-btn" onClick={handleLogout} title="Logout">
                     <LogOut size={24} />
                 </button>
@@ -1588,6 +1610,7 @@ function ManagerDashboard() {
                     <Route path="reports" element={<PlaceholderPage title="Reports" />} />
                     <Route path="settings" element={<PlaceholderPage title="Settings" />} />
                 </Route>
+                <Route path="profile" element={<ManagerProfile />} />
             </Routes>
         </DataProvider>
     );
