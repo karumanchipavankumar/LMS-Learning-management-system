@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { jwtDecode } from "jwt-decode";
-import { ArrowLeft } from 'lucide-react';
 import './EmployeeProfile.css';
 
-const EmployeeProfile = () => {
+const ManagerProfile = () => {
     const navigate = useNavigate();
     const [profile, setProfile] = useState({
         firstName: '',
@@ -39,7 +37,7 @@ const EmployeeProfile = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:8080/employee/profile', {
+                const response = await axios.get('http://localhost:8080/manager/profile', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProfile(response.data);
@@ -101,7 +99,7 @@ const EmployeeProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.put('http://localhost:8080/employee/profile', profile, {
+            await axios.put('http://localhost:8080/manager/profile', profile, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOriginalProfile(profile);
@@ -134,7 +132,7 @@ const EmployeeProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const response = await axios.post('http://localhost:8080/employee/change-password', {
+            const response = await axios.post('http://localhost:8080/manager/change-password', {
                 currentPassword: passwords.currentPassword,
                 newPassword: passwords.newPassword
             }, {
@@ -183,8 +181,6 @@ const EmployeeProfile = () => {
                         <div className="profile-user-email">{profile.email}</div>
                     </div>
 
-                    {/* Removed sidebar back link */}
-
                     <nav className="profile-nav">
                         <button className={`profile-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,7 +200,6 @@ const EmployeeProfile = () => {
                             </svg>
                             <span>Notifications</span>
                         </button>
-                        {/* Other nav items can stay static for now */}
                         <button className="profile-nav-item" onClick={() => {
                             localStorage.removeItem('token');
                             navigate('/');
@@ -223,7 +218,7 @@ const EmployeeProfile = () => {
                         <div className="header-banner-left">
                             <button
                                 className="back-arrow-btn"
-                                onClick={() => navigate('/employee')}
+                                onClick={() => navigate('/manager')}
                                 aria-label="Go back"
                             >
                                 <svg
@@ -372,4 +367,4 @@ const EmployeeProfile = () => {
     );
 };
 
-export default EmployeeProfile;
+export default ManagerProfile;

@@ -7,9 +7,15 @@ import com.oryfolks.lms_backend.entity.User;
 import com.oryfolks.lms_backend.entity.UserProfile;
 import com.oryfolks.lms_backend.repository.UserProfileRepository;
 import com.oryfolks.lms_backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+import com.oryfolks.lms_backend.entity.PasswordResetToken;
+import com.oryfolks.lms_backend.repository.PasswordResetTokenRepository;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.oryfolks.lms_backend.DTO.AddUserForm;
 import com.oryfolks.lms_backend.config.JwtUtil;
@@ -34,6 +40,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
+    @Autowired
+    private PasswordResetTokenRepository tokenRepository;
 
     @Override
     public User createUser(User user) {
@@ -103,7 +115,15 @@ public class UserServiceImpl implements UserService {
         System.out.println("UserServiceImpl: form.isSendWelcomeEmail() = " + form.isSendWelcomeEmail());
         if (form.isSendWelcomeEmail() && form.getEmail() != null && !form.getEmail().isEmpty()) {
             System.out.println("UserServiceImpl: Triggering welcome email...");
-            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword());
+            
+            // Generate reset token for new user
+            String token = UUID.randomUUID().toString();
+            tokenRepository.deleteByUser(savedUser);
+            PasswordResetToken resetToken = new PasswordResetToken(token, savedUser, LocalDateTime.now().plusHours(24));
+            tokenRepository.save(resetToken);
+            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(), resetLink);
         } else {
             System.out.println("UserServiceImpl: Welcome email skipped. Condition not met.");
         }
@@ -139,5 +159,67 @@ public class UserServiceImpl implements UserService {
         // Email is explicitly NOT updated here to keep it read-only
 
         return java.util.Objects.requireNonNull(userProfileRepository.save(profile));
+    }
+
+    @Override
+    @Transactional
+    public void createPasswordResetTokenForUser(String email) {
+        System.out.println("UserService: Password reset requested for email: " + email);
+        
+        String normalizedEmail = email.trim().toLowerCase();
+        
+        if (!normalizedEmail.endsWith("@oryfolks.com")) {
+            System.err.println("UserService: Domain validation failed for: " + normalizedEmail);
+            throw new RuntimeException("Only @oryfolks.com emails are allowed for password reset.");
+        }
+
+        UserProfile profile = userProfileRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new RuntimeException("Email not found: " + normalizedEmail));
+        
+        User user = profile.getUser();
+        String token = UUID.randomUUID().toString();
+        
+        PasswordResetToken resetToken = tokenRepository.findByUser(user)
+                .orElse(new PasswordResetToken());
+        
+        resetToken.setUser(user);
+        resetToken.setToken(token);
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+        
+        tokenRepository.save(resetToken);
+        
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(normalizedEmail, resetLink);
+    }
+
+    @Override
+    @Transactional
+    public void validateAndResetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or missing token"));
+                
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("Token has expired");
+        }
+        
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        tokenRepository.delete(resetToken);
+    }
+
+    @Override
+    @Transactional
+    public void changeUserPassword(String username, String oldPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+                
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Incorrect current password");
+        }
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

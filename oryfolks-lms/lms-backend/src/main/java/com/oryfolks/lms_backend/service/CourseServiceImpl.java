@@ -275,11 +275,12 @@ public class CourseServiceImpl implements CourseService {
 
                 long employeeCount = employeeCourseRepository.countByCourseId(courseId);
 
-                // Fetch video details (URL and Contents)
-                CourseVideo video = courseVideoRepository.findAll().stream()
-                                .filter(v -> v.getCourse().getId().equals(courseId))
-                                .findFirst()
-                                .orElse(null);
+                // Fetch video details directly for this specific course via a proper DB query.
+                // FIXED: The previous courseVideoRepository.findAll().stream().filter(...) pattern was
+                // loading ALL videos into memory, and Hibernate's lazy-loading proxy was causing the
+                // same cached course object to be returned for every video, making every course show
+                // identical contents.
+                CourseVideo video = courseVideoRepository.findByCourseId(courseId).orElse(null);
 
                 String videoUrl = (video != null) ? video.getVideoUrl() : null;
                 List<CourseContentDTO> contentDTOs = new java.util.ArrayList<>();
@@ -317,32 +318,37 @@ public class CourseServiceImpl implements CourseService {
                                 return new CourseContentDTO(c.getId(), displayTitle, displayTimestamp, isCompleted);
                         }).collect(java.util.stream.Collectors.toList());
 
-                        // FALLBACK: If no structured contents exist, try to use the legacy contents text field
+                        // FALLBACK: If no structured contents exist, try to promote the legacy text field.
+                        // CRITICAL: Only run parseAndSaveContents if contents are truly empty in the DB.
+                        // Without this guard, it runs on every page view and creates endless duplicate rows.
                         if (contentDTOs.isEmpty() && video.getContents() != null && !video.getContents().isBlank()) {
-                                // Automatically promote legacy contents to structured data to ensure they have IDs
-                                parseAndSaveContents(video.getContents(), video);
-                                // Re-fetch to get the newly created contents with their IDs
-                                contents = courseContentRepository.findByCourseVideoIdOrderByTimestampAsc(video.getId());
-                                contentDTOs = contents.stream().map(c -> {
-                                        boolean isCompleted = false;
-                                        if (finalEmpId != null) {
-                                                isCompleted = employeeContentProgressRepository
-                                                                .findByEmployeeIdAndContentId(finalEmpId, c.getId())
-                                                                .map(EmployeeContentProgress::isCompleted)
-                                                                .orElse(false);
-                                        }
-                                        
-                                        String displayTitle = c.getTitle();
-                                        Double displayTimestamp = c.getTimestamp();
-                                        if (displayTitle != null && !displayTitle.isBlank()) {
-                                                ParsedContent pc = parseContentLine(displayTitle);
-                                                displayTitle = pc.title;
-                                                if (pc.timeFound && (displayTimestamp == null || displayTimestamp == 0.0)) {
-                                                        displayTimestamp = pc.timestamp;
+                                // Double-check the DB to be absolutely sure no rows exist for this video
+                                long existingCount = courseContentRepository.countByCourseVideoId(video.getId());
+                                if (existingCount == 0) {
+                                        // Safe to promote legacy text contents into structured rows
+                                        parseAndSaveContents(video.getContents(), video);
+                                        // Re-fetch newly created contents
+                                        contents = courseContentRepository.findByCourseVideoIdOrderByTimestampAsc(video.getId());
+                                        contentDTOs = contents.stream().map(c -> {
+                                                boolean isCompleted = false;
+                                                if (finalEmpId != null) {
+                                                        isCompleted = employeeContentProgressRepository
+                                                                        .findByEmployeeIdAndContentId(finalEmpId, c.getId())
+                                                                        .map(EmployeeContentProgress::isCompleted)
+                                                                        .orElse(false);
                                                 }
-                                        }
-                                        return new CourseContentDTO(c.getId(), displayTitle, displayTimestamp, isCompleted);
-                                }).collect(java.util.stream.Collectors.toList());
+                                                String displayTitle = c.getTitle();
+                                                Double displayTimestamp = c.getTimestamp();
+                                                if (displayTitle != null && !displayTitle.isBlank()) {
+                                                        ParsedContent pc = parseContentLine(displayTitle);
+                                                        displayTitle = pc.title;
+                                                        if (pc.timeFound && (displayTimestamp == null || displayTimestamp == 0.0)) {
+                                                                displayTimestamp = pc.timestamp;
+                                                        }
+                                                }
+                                                return new CourseContentDTO(c.getId(), displayTitle, displayTimestamp, isCompleted);
+                                        }).collect(java.util.stream.Collectors.toList());
+                                }
                         }
                 }
 
@@ -436,10 +442,8 @@ public class CourseServiceImpl implements CourseService {
                 courseEnrollmentRepository.deleteByCourseId(id);
                 System.out.println("CourseServiceImpl: Deleted course enrollment requests.");
 
-                // 4. Delete intro videos
-                courseVideoRepository.findAll().stream()
-                                .filter(v -> v != null && v.getCourse() != null && id.equals(v.getCourse().getId()))
-                                .forEach(courseVideoRepository::delete);
+                // 4. Delete intro videos (queried directly by courseId instead of filtering all in memory)
+                courseVideoRepository.findByCourseId(id).ifPresent(courseVideoRepository::delete);
                 System.out.println("CourseServiceImpl: Deleted course videos.");
 
                 // 5. Finally delete the course

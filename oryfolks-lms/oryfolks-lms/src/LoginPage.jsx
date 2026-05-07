@@ -14,7 +14,7 @@ const LoginPage = () => {
     const validateForm = () => {
         const newErrors = {};
         if (!loginValue.trim()) {
-            newErrors.login = loginType === 'ADMIN' ? 'Email is required' : 'Username is required';
+            newErrors.login = loginType === 'ADMIN' ? 'Email is required' : 'Username/Email is required';
         } else if (loginType === 'ADMIN' && !/\S+@\S+\.\S+/.test(loginValue)) {
             newErrors.login = 'Invalid email format';
         }
@@ -60,10 +60,6 @@ const LoginPage = () => {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const role = payload.role.replace('ROLE_', '');
 
-            /* ===============================
-               ROLE VALIDATION LOGIC (FIXED)
-            ================================ */
-
             // Admin login → ONLY admin allowed
             if (loginType === 'ADMIN' && role !== 'ADMIN') {
                 localStorage.removeItem('token');
@@ -78,9 +74,6 @@ const LoginPage = () => {
                 return;
             }
 
-            /* ===============================
-               ROLE-BASED NAVIGATION
-            ================================ */
             switch (role) {
                 case 'ADMIN':
                     navigate('/admin');
@@ -99,102 +92,102 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="login-page-wrapper">
-            <div className="container">
-
-                <div className="header">
-                    <img src={logo} alt="ORYFOLKS Logo" className="logo" />
-                    <h1 className="main-title">Learning Management System</h1>
-                    <p className="subtitle">Corporate Learning Platform</p>
+        <div className="login-container">
+            {/* Left Panel with Logo and LMS Heading */}
+            <div className="login-left-panel">
+                <div className="logo-container">
+                    <img src={logo} alt="OryFolks Logo" className="logo" />
                 </div>
+                <div className="lms-text-container">
+                    <h1 className="lms-main-heading">
+                        <span>LMS -</span>
+                        <span>Learning Management System</span>
+                    </h1>
+                    <div className="lms-underline"></div>
+                </div>
+            </div>
 
-                <div className="login-card">
-                    <div className="welcome-section">
-                        <h2 className="welcome-title">Welcome Back</h2>
-                        <p className="welcome-text">Sign in to continue</p>
-                    </div>
+            {/* Right Panel with Form */}
+            <div className="login-right-panel">
+                <div className="form-wrapper">
+                    <h1 className="form-title">Account Login</h1>
+                    <p className="form-subtitle">
+                        If you are already a member you can login with your email address and password.
+                    </p>
 
-                    {/* LOGIN TYPE SELECT */}
-                    <div className="login-type">
-                        <label>
+                    <div className="login-type-toggle">
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 value="EMPLOYEE"
                                 checked={loginType === 'EMPLOYEE'}
                                 onChange={() => setLoginType('EMPLOYEE')}
                             />
-                            Employee
+                            <span>Employee</span>
                         </label>
-
-                        <label style={{ marginLeft: '20px' }}>
+                        <label className="radio-label">
                             <input
                                 type="radio"
                                 value="ADMIN"
                                 checked={loginType === 'ADMIN'}
                                 onChange={() => setLoginType('ADMIN')}
                             />
-                            Admin
+                            <span>Admin</span>
                         </label>
                     </div>
 
-                    <form className="form" onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit}>
+                        <div className="input-group">
+                            <label>Email address</label>
+                            <input
+                                type={loginType === 'ADMIN' ? 'email' : 'text'}
+                                className={`form-input ${errors.login ? 'error' : ''}`}
+                                value={loginValue}
+                                onChange={(e) => {
+                                    setLoginValue(e.target.value);
+                                    setErrors(prev => ({ ...prev, login: '' }));
+                                }}
+                            />
+                            {errors.login && <span className="error-message">{errors.login}</span>}
+                        </div>
 
-                        {/* USERNAME / EMAIL */}
-                        <input
-                            type={loginType === 'ADMIN' ? 'email' : 'text'}
-                            placeholder={
-                                loginType === 'ADMIN'
-                                    ? 'Admin Email Address'
-                                    : 'Employee Username'
-                            }
-                            className={`input-field ${errors.login || errors.username ? 'error' : ''}`}
-                            value={loginValue}
-                            onChange={(e) => {
-                                setLoginValue(e.target.value);
-                                setErrors(prev => ({ ...prev, login: '', username: '' }));
-                            }}
-                        />
-                        {(errors.login || errors.username) && <div className="error-text">{errors.login || errors.username}</div>}
+                        <div className="input-group">
+                            <label>Password</label>
+                            <input
+                                type="password"
+                                className={`form-input ${errors.password ? 'error' : ''}`}
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setErrors(prev => ({ ...prev, password: '' }));
+                                }}
+                            />
+                            {errors.password && <span className="error-message">{errors.password}</span>}
+                        </div>
 
-                        {/* PASSWORD */}
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className={`input-field ${errors.password ? 'error' : ''}`}
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                setErrors(prev => ({ ...prev, password: '' }));
-                            }}
-                        />
-                        {errors.password && <div className="error-text">{errors.password}</div>}
-
-                        <div className="remember-forgot">
+                        <div className="form-actions">
                             <label className="checkbox-label">
                                 <input
                                     type="checkbox"
-                                    className="checkbox-input"
                                     checked={rememberMe}
                                     onChange={(e) => setRememberMe(e.target.checked)}
                                 />
-                                Remember me
+                                <span>Remember me</span>
                             </label>
-                        </div>
-
-                        <div className="button-container">
-                            <button type="submit" className="signin-button">
-                                Sign in
+                            <button 
+                                type="button" 
+                                className="forgot-password-btn"
+                                onClick={() => navigate('/forgot-password')}
+                            >
+                                Forgot Password?
                             </button>
                         </div>
+
+                        <button type="submit" className="submit-btn">
+                            Login
+                        </button>
                     </form>
                 </div>
-
-                <div className="footer-links">
-                    <a href="#" className="footer-link">Privacy Policy</a>
-                    <a href="#" className="footer-link">Terms & Services</a>
-                    <a href="#" className="footer-link">Support</a>
-                </div>
-
             </div>
         </div>
     );

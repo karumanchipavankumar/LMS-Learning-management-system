@@ -11,7 +11,12 @@ import com.oryfolks.lms_backend.repository.UserProfileRepository;
 import com.oryfolks.lms_backend.repository.UserRepository;
 import com.oryfolks.lms_backend.entity.User;
 import com.oryfolks.lms_backend.entity.UserProfile;
+import com.oryfolks.lms_backend.entity.PasswordResetToken;
+import com.oryfolks.lms_backend.repository.PasswordResetTokenRepository;
 import com.oryfolks.lms_backend.DTO.AddUserForm;
+import com.oryfolks.lms_backend.DTO.UserManagementDTO;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import com.oryfolks.lms_backend.DTO.UserManagementDTO;
 
 @Service
@@ -37,6 +42,9 @@ public class AdminUserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PasswordResetTokenRepository tokenRepository;
 
     @Autowired
     private com.oryfolks.lms_backend.repository.EmployeeContentProgressRepository employeeContentProgressRepository;
@@ -78,7 +86,15 @@ public class AdminUserService {
         System.out.println("AdminUserService: form.isSendWelcomeEmail() = " + form.isSendWelcomeEmail());
         if (form.isSendWelcomeEmail() && form.getEmail() != null && !form.getEmail().isEmpty()) {
             System.out.println("AdminUserService: Triggering welcome email...");
-            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword());
+            
+            // Generate reset token for new user
+            String token = UUID.randomUUID().toString();
+            tokenRepository.deleteByUser(savedUser);
+            PasswordResetToken resetToken = new PasswordResetToken(token, savedUser, LocalDateTime.now().plusHours(24));
+            tokenRepository.save(resetToken);
+            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(), resetLink);
         } else {
             System.out.println("AdminUserService: Welcome email skipped. Condition not met.");
         }

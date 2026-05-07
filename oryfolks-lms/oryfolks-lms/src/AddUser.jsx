@@ -23,6 +23,7 @@ const AddUser = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
@@ -91,6 +92,8 @@ const AddUser = () => {
     const handleSave = async () => {
         if (!validateForm()) return;
 
+        setIsLoading(true);
+
         try {
             const token = localStorage.getItem("token");
 
@@ -129,6 +132,8 @@ const AddUser = () => {
             } else {
                 alert(error.response?.data?.error || "Failed to create user");
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -369,8 +374,12 @@ const AddUser = () => {
                         <button className="btn btn-danger" onClick={handleReset}>
                             Reset Form
                         </button>
-                        <button className="btn btn-primary" onClick={handleSave}>
-                            Save & Create
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleSave}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Creating User...' : 'Save & Create'}
                         </button>
                     </div>
 

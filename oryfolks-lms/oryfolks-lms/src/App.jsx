@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './LoginPage';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 import AdminDashboard from './AdminDashboard';
 import EmployeeDashboard from './EmployeeDashboard';
 import CoursePlayer from './CoursePlayer';
@@ -19,6 +21,8 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 {/* Admin Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>

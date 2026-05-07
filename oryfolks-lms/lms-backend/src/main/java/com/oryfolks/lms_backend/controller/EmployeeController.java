@@ -9,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.oryfolks.lms_backend.DTO.ChangePasswordRequest;
 import com.oryfolks.lms_backend.DTO.CourseResponseDTO;
 import com.oryfolks.lms_backend.service.CourseService;
 import com.oryfolks.lms_backend.service.UserService;
@@ -25,13 +26,17 @@ public class EmployeeController {
     @Autowired
     private CourseService courseService;
 
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(
-            @RequestParam String username,
-            @RequestParam String newPassword) {
-
-        userService.resetPassword(username, newPassword);
-        return ResponseEntity.ok("Password updated");
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        
+        try {
+            userService.changeUserPassword(auth.getName(), request.getCurrentPassword(), request.getNewPassword());
+            return ResponseEntity.ok(java.util.Map.of("message", "Password successfully updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("courses/my")

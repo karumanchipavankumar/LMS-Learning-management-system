@@ -53,7 +53,7 @@ public class EmailService {
         }
     }
 
-    public void sendWelcomeEmail(String to, String firstName, String username, String initialPassword) {
+    public void sendWelcomeEmail(String to, String firstName, String username, String initialPassword, String resetLink) {
         System.out.println("EmailService: sendWelcomeEmail requested for " + to);
         String subject = "Welcome to Oryfolks LMS!";
         String bodyContent = "Dear " + firstName + ",<br/><br/>" +
@@ -61,7 +61,21 @@ public class EmailService {
                 "Here are your login details:<br/>" +
                 "<strong>Username:</strong> " + username + "<br/>" +
                 "<strong>Password:</strong> " + initialPassword + "<br/><br/>" +
-                "Please login and change your password immediately.<br/><br/>" +
+                "Please login and change your password immediately. You can set a new password by clicking the link below:<br/>" +
+                "<a href='" + resetLink + "'>Set Your Password</a><br/><br/>" +
+                "Best Regards,<br/>" +
+                "Oryfolks LMS Team";
+
+        sendEmail(to, subject, bodyContent);
+    }
+
+    public void sendPasswordResetEmail(String to, String resetLink) {
+        String subject = "Password Reset Request - Oryfolks LMS";
+        String bodyContent = "Dear User,<br/><br/>" +
+                "You have requested to reset your password.<br/><br/>" +
+                "Click the link below to reset it:<br/>" +
+                "<a href='" + resetLink + "'>Reset Password</a><br/><br/>" +
+                "If you did not request this, please ignore this email.<br/><br/>" +
                 "Best Regards,<br/>" +
                 "Oryfolks LMS Team";
 

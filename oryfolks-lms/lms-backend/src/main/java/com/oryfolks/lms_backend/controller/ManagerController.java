@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.oryfolks.lms_backend.DTO.AssignCourseRequest;
+import com.oryfolks.lms_backend.DTO.ChangePasswordRequest;
 import com.oryfolks.lms_backend.DTO.TeamMemberDTO;
 import com.oryfolks.lms_backend.entity.Course;
 import com.oryfolks.lms_backend.repository.CourseRepository;
@@ -25,6 +26,9 @@ public class ManagerController {
 
     @Autowired
     private ManagerServiceImpl managerService;
+
+    @Autowired
+    private com.oryfolks.lms_backend.service.UserService userService;
 
     @GetMapping("/courses")
     public List<Course> getAllCourses() {
@@ -86,4 +90,30 @@ public class ManagerController {
         return ResponseEntity.ok("Reminder sent successfully");
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<?> getMyProfile() {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        return ResponseEntity.ok(userService.getProfile(auth.getName()));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateMyProfile(@RequestBody @Valid com.oryfolks.lms_backend.entity.UserProfile updatedProfile) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        return ResponseEntity.ok(userService.updateProfile(auth.getName(), updatedProfile));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        
+        try {
+            userService.changeUserPassword(auth.getName(), request.getCurrentPassword(), request.getNewPassword());
+            return ResponseEntity.ok(java.util.Map.of("message", "Password successfully updated"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }
