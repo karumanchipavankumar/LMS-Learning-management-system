@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from './assets/logo.png';
+import API_BASE_URL from './apiConfig';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -29,7 +30,7 @@ const LoginPage = () => {
         if (!validateForm()) return;
 
         try {
-            const response = await fetch('http://localhost:8080/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

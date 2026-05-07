@@ -3,6 +3,7 @@ package com.oryfolks.lms_backend.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,9 @@ public class AdminUserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Autowired
     private UserProfileRepository userProfileRepository;
@@ -92,7 +96,7 @@ public class AdminUserService {
             tokenRepository.deleteByUser(savedUser);
             PasswordResetToken resetToken = new PasswordResetToken(token, savedUser, LocalDateTime.now().plusHours(24));
             tokenRepository.save(resetToken);
-            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            String resetLink = frontendUrl + "/reset-password?token=" + token;
 
             emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(), resetLink);
         } else {
