@@ -61,10 +61,12 @@ public class EmailService {
                 "Here are your login details:<br/>" +
                 "<strong>Username:</strong> " + username + "<br/>" +
                 "<strong>Password:</strong> " + initialPassword + "<br/><br/>" +
-                "Please login and change your password immediately. You can set a new password by clicking the link below:<br/>" +
-                "<a href='" + resetLink + "'>Set Your Password</a><br/><br/>" +
+                "Please login and change your password immediately. You can set a new password by clicking the button below:<br/><br/>" +
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "  <a href='" + resetLink + "' style='background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>Set Your Password</a>" +
+                "</div>" +
                 "Best Regards,<br/>" +
-                "Oryfolks LMS Team";
+                "<strong>Oryfolks LMS Team</strong>";
 
         sendEmail(to, subject, bodyContent);
     }
@@ -73,11 +75,13 @@ public class EmailService {
         String subject = "Password Reset Request - Oryfolks LMS";
         String bodyContent = "Dear User,<br/><br/>" +
                 "You have requested to reset your password.<br/><br/>" +
-                "Click the link below to reset it:<br/>" +
-                "<a href='" + resetLink + "'>Reset Password</a><br/><br/>" +
+                "Click the button below to reset it:<br/><br/>" +
+                "<div style='text-align: center; margin: 30px 0;'>" +
+                "  <a href='" + resetLink + "' style='background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>Reset Password</a>" +
+                "</div>" +
                 "If you did not request this, please ignore this email.<br/><br/>" +
                 "Best Regards,<br/>" +
-                "Oryfolks LMS Team";
+                "<strong>Oryfolks LMS Team</strong>";
 
         sendEmail(to, subject, bodyContent);
     }

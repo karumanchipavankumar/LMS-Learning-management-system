@@ -42,6 +42,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Jakarta Annotations for @PostConstruct (Java 9+) -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+
         <!-- Microsoft Graph API -->
         <dependency>
             <groupId>com.azure</groupId>
