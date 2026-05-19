@@ -25,7 +25,7 @@ public class CourseRating {
     private User user;
 
     @Column(nullable = false)
-    private Integer rating; // 1 to 5
+    private Double rating; // 1 to 5
 
     @Column(length = 1000)
     private String review;

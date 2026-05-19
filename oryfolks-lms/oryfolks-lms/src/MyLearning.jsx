@@ -131,6 +131,49 @@ const MyLearning = () => {
                                                 </div>
                                                 <div className="employee-course-content">
                                                     <h3 className="employee-course-title">{course.title}</h3>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            marginTop: '6px',
+                                                            marginBottom: '8px',
+                                                            fontSize: '13px'
+                                                        }}
+                                                    >
+
+                                                        <span
+                                                            style={{
+                                                                color: '#f59e0b'
+                                                            }}
+                                                        >
+                                                            ⭐
+                                                        </span>
+
+                                                        <span
+                                                            style={{
+                                                                fontWeight: '600',
+                                                                color: '#334155'
+                                                            }}
+                                                        >
+
+                                                            {course.rating
+                                                                ? course.rating.toFixed(1)
+                                                                : '0.0'}
+
+                                                        </span>
+
+                                                        <span
+                                                            style={{
+                                                                color: '#94a3b8'
+                                                            }}
+                                                        >
+
+                                                            ({course.ratingCount || 0} ratings)
+
+                                                        </span>
+
+                                                    </div>
                                                     <div className="employee-course-meta">
                                                         <div className="meta-item">
                                                             <span className="course-duration">Duration: {course.duration}</span>
@@ -178,6 +221,49 @@ const MyLearning = () => {
                                                 </div>
                                                 <div className="employee-course-content">
                                                     <h3 className="employee-course-title">{course.title}</h3>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            marginTop: '6px',
+                                                            marginBottom: '8px',
+                                                            fontSize: '13px'
+                                                        }}
+                                                    >
+
+                                                        <span
+                                                            style={{
+                                                                color: '#f59e0b'
+                                                            }}
+                                                        >
+                                                            ⭐
+                                                        </span>
+
+                                                        <span
+                                                            style={{
+                                                                fontWeight: '600',
+                                                                color: '#334155'
+                                                            }}
+                                                        >
+
+                                                            {course.rating
+                                                                ? course.rating.toFixed(1)
+                                                                : '0.0'}
+
+                                                        </span>
+
+                                                        <span
+                                                            style={{
+                                                                color: '#94a3b8'
+                                                            }}
+                                                        >
+
+                                                            ({course.ratingCount || 0} ratings)
+
+                                                        </span>
+
+                                                    </div>
                                                     <div className="employee-course-meta">
                                                         <div className="meta-item">
                                                             <span className="course-duration">Duration: {course.duration}</span>
@@ -221,6 +307,49 @@ const MyLearning = () => {
                                         </div>
                                         <div className="employee-course-content">
                                             <h3 className="employee-course-title">{course.courseName}</h3>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    marginTop: '6px',
+                                                    marginBottom: '8px',
+                                                    fontSize: '13px'
+                                                }}
+                                            >
+
+                                                <span
+                                                    style={{
+                                                        color: '#f59e0b'
+                                                    }}
+                                                >
+                                                    ⭐
+                                                </span>
+
+                                                <span
+                                                    style={{
+                                                        fontWeight: '600',
+                                                        color: '#334155'
+                                                    }}
+                                                >
+
+                                                    {course.rating
+                                                        ? course.rating.toFixed(1)
+                                                        : '0.0'}
+
+                                                </span>
+
+                                                <span
+                                                    style={{
+                                                        color: '#94a3b8'
+                                                    }}
+                                                >
+
+                                                    ({course.ratingCount || 0} ratings)
+
+                                                </span>
+
+                                            </div>
                                             <div className="employee-course-meta">
                                                 <div className="meta-item">
                                                     <span className="course-duration">Duration: {course.duration}</span>

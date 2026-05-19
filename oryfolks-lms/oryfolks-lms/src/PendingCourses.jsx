@@ -83,10 +83,13 @@ const PendingCourses = () => {
                     <table className="cm-table">
                         <thead>
                             <tr>
-                                <th>Course ID</th>
-                                <th>Course Name</th>
-                                <th>Created Date</th>
-                                <th>Action</th>
+                                <tr>
+                                    <th>Course ID</th>
+                                    <th>Course Name</th>
+                                    <th>Rating</th>
+                                    <th>Created Date</th>
+                                    <th>Action</th>
+                                </tr>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,9 +97,39 @@ const PendingCourses = () => {
                                 filteredAssignments.map((a) => (
                                     <tr key={a.courseId}>
                                         <td style={{ color: '#9CA3AF' }}>#{a.courseId}</td>
-                                        <td className="cm-course-name">{a.courseName}</td>
+                                        <td className="cm-course-name">
+                                            {a.courseName}
+                                        </td>
+
+                                        <td>
+
+                                            <span
+                                                style={{
+                                                    color: '#f59e0b',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                ⭐ {a.rating
+                                                    ? a.rating.toFixed(1)
+                                                    : '0.0'}
+                                            </span>
+
+                                            <span
+                                                style={{
+                                                    color: '#94a3b8',
+                                                    fontSize: '12px',
+                                                    marginLeft: '5px'
+                                                }}
+                                            >
+                                                ({a.ratingCount || 0})
+                                            </span>
+
+                                        </td>
+
                                         <td style={{ color: '#4B5563' }}>
-                                            {a.createdDate ? new Date(a.createdDate).toLocaleDateString() : 'N/A'}
+                                            {a.createdDate
+                                                ? new Date(a.createdDate).toLocaleDateString()
+                                                : 'N/A'}
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -116,7 +149,7 @@ const PendingCourses = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+                                    <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
                                         No Un Assigned Courses Found
                                     </td>
                                 </tr>

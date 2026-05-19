@@ -25,4 +25,8 @@ public class AssignedCourseDTO {
     private String duration;
     private String enrollmentType;
     private boolean reminderSent;
+
+    private Double rating;
+
+    private Integer ratingCount;
 }

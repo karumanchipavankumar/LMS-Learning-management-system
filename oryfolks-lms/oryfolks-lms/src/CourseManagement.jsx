@@ -95,6 +95,7 @@ const CourseManagement = ({ onBack }) => {
                         <tr>
                             <th>ID</th>
                             <th>Title</th>
+                            <th>Rating</th>
                             <th>Created</th>
                             <th>Action</th>
                         </tr>
@@ -109,6 +110,31 @@ const CourseManagement = ({ onBack }) => {
 
                                     <td className="cm-course-name">
                                         {course.title}
+                                    </td>
+
+                                    <td>
+
+                                        <span
+                                            style={{
+                                                color: '#f59e0b',
+                                                fontWeight: '600'
+                                            }}
+                                        >
+                                            ⭐ {course.rating
+                                                ? course.rating.toFixed(1)
+                                                : '0.0'}
+                                        </span>
+
+                                        <span
+                                            style={{
+                                                color: '#94a3b8',
+                                                fontSize: '12px',
+                                                marginLeft: '5px'
+                                            }}
+                                        >
+                                            ({course.ratingCount || 0})
+                                        </span>
+
                                     </td>
 
                                     <td>
@@ -137,7 +163,7 @@ const CourseManagement = ({ onBack }) => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+                                <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
                                     No Courses Found
                                 </td>
                             </tr>
