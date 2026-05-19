@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
             tokenRepository.deleteByUser(savedUser);
             PasswordResetToken resetToken = new PasswordResetToken(token, savedUser, LocalDateTime.now().plusHours(24));
             tokenRepository.save(resetToken);
-            String resetLink = "http://localhost:5173/reset-password?token=" + token;
+            String resetLink = frontendUrl + "/reset-password?token=" + token;
 
             emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(),
                     resetLink);
