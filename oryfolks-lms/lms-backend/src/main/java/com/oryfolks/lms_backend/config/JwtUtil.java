@@ -16,13 +16,35 @@ public class JwtUtil {
     private static final String SECRET_STRING = "mySuperSecretKeyForJwtSigningWhichIsAtLeast256Bits!";
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET_STRING.getBytes());
 
-    public String generateToken(String username, String role) {
+    public String generateToken(
+            Long userId,
+            String username,
+            String role) {
+
         return Jwts.builder()
+
+                // Username
                 .setSubject(username)
+
+                // Role
                 .claim("role", role)
+
+                // User ID
+                .claim("userId", userId)
+
+                // Token generated time
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // Use Key object
+
+                // Expiry time
+                .setExpiration(
+                        new Date(
+                                System.currentTimeMillis() + 86400000))
+
+                // Signature
+                .signWith(
+                        SECRET_KEY,
+                        SignatureAlgorithm.HS256)
+
                 .compact();
     }
 

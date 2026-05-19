@@ -13,7 +13,7 @@ import com.oryfolks.lms_backend.entity.User;
 import com.oryfolks.lms_backend.repository.CourseRepository;
 import com.oryfolks.lms_backend.repository.EmployeeCourseRepository;
 import com.oryfolks.lms_backend.repository.UserRepository;
-
+import com.oryfolks.lms_backend.repository.CourseRatingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +26,7 @@ public class ManagerServiceImpl {
     private final CourseRepository courseRepository;
     private final com.oryfolks.lms_backend.repository.CourseEnrollmentRepository courseEnrollmentRepository;
     private final EmailService emailService;
+    private final CourseRatingRepository courseRatingRepository;
 
     public void sendAssignmentReminder(Long courseId, Long employeeId) {
         if (courseId == null || employeeId == null) {
@@ -78,16 +79,40 @@ public class ManagerServiceImpl {
                     courseRepository.findById(courseId)
                             .ifPresent(course -> assignedCourses.add(
                                     AssignedCourseDTO.builder()
+
                                             .courseId(course.getId())
+
                                             .courseName(course.getTitle())
+
                                             .progress(ec.getProgress())
+
                                             .deadline(ec.getDeadline())
+
                                             .status(ec.getStatus())
+
                                             .thumbnailUrl(course.getThumbnailUrl())
+
                                             .category(course.getCategory())
+
                                             .duration(course.getDuration())
+
                                             .enrollmentType(ec.getEnrollmentType())
+
                                             .reminderSent(ec.isReminderSent())
+
+                                            // Fetch average rating
+                                            .rating(
+                                                    courseRatingRepository.getAverageRating(course.getId()) != null
+                                                            ? courseRatingRepository.getAverageRating(course.getId())
+                                                            : 0.0)
+
+                                            // Fetch ratings count
+                                            .ratingCount(
+                                                    courseRatingRepository.getRatingCount(course.getId()) != null
+                                                            ? courseRatingRepository.getRatingCount(course.getId())
+                                                                    .intValue()
+                                                            : 0)
+
                                             .build()));
                 }
             }

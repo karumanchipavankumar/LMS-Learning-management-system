@@ -319,10 +319,33 @@ const EmployeeDashboard = () => {
 
                     {activeTab !== 'assigned' && (
                         <div className="course-rating-section">
+
                             <div className="stars-container">
+
                                 {renderStars(course.rating || 0)}
+
                             </div>
-                            <span className="rating-value">({course.rating ? course.rating.toFixed(1) : '0'})</span>
+
+                            <span className="rating-value">
+
+                                (
+                                {course.rating
+                                    ? course.rating.toFixed(1)
+                                    : '0.0'}
+                                )
+
+                            </span>
+
+                            <span
+                                style={{
+                                    marginLeft: '6px',
+                                    color: '#64748b',
+                                    fontSize: '12px'
+                                }}
+                            >
+                                {course.ratingCount || 0} ratings
+                            </span>
+
                         </div>
                     )}
                 </div>

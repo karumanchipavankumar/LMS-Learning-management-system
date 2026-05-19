@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import Confetti from 'react-confetti';
 import axios from 'axios'; // Import axios
 import './CoursePlayer.css';
 import logo from './assets/logo.png';
@@ -12,6 +13,21 @@ const CoursePlayer = () => {
     // const [progress, setProgress] = useState(65); // derived from course if needed
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [showProgressPopup, setShowProgressPopup] = useState(false);
+    const [showRatingPopup, setShowRatingPopup] = useState(false);
+
+    const [rating, setRating] = useState(0);
+
+    const [review, setReview] = useState('');
+
+    // Celebration animation state
+    const [showCelebration, setShowCelebration] = useState(false);
+    // Success message card state
+    const [showSuccessCard, setShowSuccessCard] = useState(false);
+    // Smooth fade-out animation
+    const [fadeOut, setFadeOut] = useState(false);
+
+    // Store course reviews
+    const [reviews, setReviews] = useState([]);
 
     const markingCompletedRef = useRef(new Set());
     const [course, setCourse] = useState(null);
@@ -43,6 +59,17 @@ const CoursePlayer = () => {
             fetchCourse();
         }
     }, [courseId, token]);
+
+    // Fetch reviews after course loads
+    useEffect(() => {
+
+        // Only fetch if course exists
+        if (course?.id) {
+
+            fetchReviews();
+        }
+
+    }, [course]);
 
     // Resume video logic
     useEffect(() => {
@@ -209,41 +236,212 @@ const CoursePlayer = () => {
         }
     };
 
-    const handleVideoEnded = () => {
-        let isFullyCompleted = true;
+    const handleSubmitFeedback = async () => {
 
-        if (course.contents && course.contents.length > 0) {
-            const lastItem = course.contents[course.contents.length - 1];
-            const isEligible = course.contents.length === 1 || course.contents[course.contents.length - 2].completed;
-            const hasWatchedToEnd = furthestWatchedTime.current >= (videoRef.current ? videoRef.current.duration - 1.0 : 0);
+        // Rating mandatory validation
+        if (!rating) {
 
-            if (!lastItem.completed) {
-                if (isEligible && hasWatchedToEnd) {
-                    markContentCompleted(lastItem.id);
-                } else {
-                    isFullyCompleted = false; // Failed strict tracking
-                }
-            } else {
-                // If the last module is legitimately already completed, the user already finished the course previously.
-            }
-        } else {
-            if (furthestWatchedTime.current < (videoRef.current ? videoRef.current.duration - 1.0 : 0)) {
-                isFullyCompleted = false;
-            }
+            alert("Please select rating");
+
+            return;
         }
 
-        if (isFullyCompleted) {
-            updateProgress(100, videoRef.current ? videoRef.current.duration : 0);
-        } else {
-            updateProgress(99, videoRef.current ? videoRef.current.currentTime : 0);
+        try {
+
+            const decodedToken = JSON.parse(
+                atob(token.split('.')[1])
+            );
+
+            console.log(decodedToken);
+
+            // Get user id from token
+            const userId =
+                decodedToken.userId ||
+                decodedToken.id ||
+                decodedToken.employeeId;
+
+            const response = await axios.post(
+
+                `http://localhost:8080/employee/course-feedback/submit/${userId}`,
+
+                {
+                    courseId: course.id,
+                    rating: parseFloat(rating),
+                    review: review
+                },
+
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            // Refresh latest reviews instantly
+            await fetchReviews();
+
+            // Close feedback popup immediately
+            setShowRatingPopup(false);
+
+            // Start celebration effect
+            setShowCelebration(true);
+
+            // Show premium success card
+            setShowSuccessCard(true);
+
+            // Hide celebration after 4 sec
+            setTimeout(() => {
+
+                // Start fade-out animation
+                setFadeOut(true);
+
+            }, 2500);
+
+
+            // Remove completely after fade animation
+            setTimeout(() => {
+
+                setShowCelebration(false);
+
+                setShowSuccessCard(false);
+
+                setFadeOut(false);
+
+            }, 4000);
+
+        } catch (error) {
+
+            console.error(error);
+
+            if (error.response?.data) {
+
+                // Handle backend object response
+                if (typeof error.response.data === 'object') {
+
+                    setFeedbackMessage(
+                        error.response.data.error ||
+                        "Something went wrong"
+                    );
+
+                } else {
+
+                    setFeedbackMessage(error.response.data);
+                }
+
+            } else {
+
+                setFeedbackMessage(
+                    "Failed to submit feedback"
+                );
+            }
         }
     };
 
-    if (loading) return <div style={{ color: 'white', padding: '20px' }}>Loading course...</div>;
-    if (!course) return <div style={{ color: 'white', padding: '20px' }}>Course not found.</div>;
+    // Fetch all reviews of course
+    const fetchReviews = async () => {
+
+        // Stop execution if course is null
+        // or course id is not available yet
+        if (!course?.id) {
+
+            return;
+        }
+
+        try {
+
+            const response = await axios.get(
+
+                `http://localhost:8080/employee/course-feedback/reviews/${course.id}`,
+
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            // Store reviews in state
+            setReviews(response.data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch reviews",
+                error
+            );
+        }
+    };
+
+    const handleVideoEnded = async () => {
+
+        // Complete final content automatically
+        if (course.contents && course.contents.length > 0) {
+
+            const lastItem =
+                course.contents[course.contents.length - 1];
+
+            // Mark last content completed
+            if (!lastItem.completed) {
+
+                markContentCompleted(lastItem.id);
+            }
+        }
+
+        // Update overall course progress to 100%
+        updateProgress(
+            100,
+            videoRef.current
+                ? videoRef.current.duration
+                : 0
+        );
+
+        try {
+
+            // Decode JWT token
+            const decodedToken = JSON.parse(
+                atob(token.split('.')[1])
+            );
+
+            // Extract logged-in employee id
+            const userId = decodedToken.userId;
+
+            // API call:
+            // check whether employee
+            // already submitted rating
+            const response = await axios.get(
+
+                `http://localhost:8080/employee/course-feedback/has-rated/${course.id}/${userId}`,
+
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const alreadyRated = response.data;
+
+            // Open popup only if
+            // employee did not rate earlier
+            if (!alreadyRated) {
+
+                setShowRatingPopup(true);
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Failed to check rating status",
+                error
+            );
+        }
+    };
 
     const location = useLocation();
     const backPath = location.state?.from || '/employee';
+
+    if (loading) return <div style={{ color: 'white', padding: '20px' }}>Loading course...</div>;
+    if (!course) return <div style={{ color: 'white', padding: '20px' }}>Course not found.</div>;
 
     return (
         <div className="course-player-container" onClick={() => setShowProgressPopup(false)}>
@@ -379,7 +577,7 @@ const CoursePlayer = () => {
                         <div className="cp-content-scrollable">
                             {/* Tabs */}
                             <div className="cp-tabs-bar">
-                                {['Overview', 'Q&A', 'NOTES', 'watchlist'].map(tab => (
+                                {['Overview', 'Q&A', 'NOTES', 'watchlist', 'reviews'].map(tab => (
                                     <button
                                         key={tab}
                                         className={`cp-tab ${activeTab === tab.toLowerCase() ? 'active' : ''}`}
@@ -400,10 +598,215 @@ const CoursePlayer = () => {
                                         </p>
                                     </div>
                                 )}
-                                {activeTab !== 'overview' && (
-                                    <div style={{ padding: '20px', color: '#6B7280' }}>
-                                        <p>Content for {activeTab} will be displayed here.</p>
-                                        <div style={{ height: '600px' }}></div>
+                                {/* Q&A */}
+
+                                {activeTab === 'q&a' && (
+
+                                    <div style={{ padding: '20px' }}>
+
+                                        <p>Q&A section coming soon.</p>
+
+                                    </div>
+                                )}
+
+
+
+                                {/* Notes */}
+
+                                {activeTab === 'notes' && (
+
+                                    <div style={{ padding: '20px' }}>
+
+                                        <p>Notes section coming soon.</p>
+
+                                    </div>
+                                )}
+
+
+
+                                {/* Watchlist */}
+
+                                {activeTab === 'watchlist' && (
+
+                                    <div style={{ padding: '20px' }}>
+
+                                        <p>Watchlist section coming soon.</p>
+
+                                    </div>
+                                )}
+
+
+
+                                {/* Reviews */}
+
+                                {activeTab === 'reviews' && (
+
+                                    <div className="reviews-container">
+
+                                        <h3
+                                            style={{
+                                                marginBottom: '24px',
+                                                fontSize: '22px',
+                                                fontWeight: '700'
+                                            }}
+                                        >
+                                            Student Feedback
+                                        </h3>
+
+                                        {reviews.length > 0 ? (
+
+                                            reviews.map((review, index) => {
+
+                                                /// Generate initials from username
+                                                const initials = review.username
+                                                    ? review.username
+                                                        .split('.')
+                                                        .map(name => name.charAt(0).toUpperCase())
+                                                        .join('')
+                                                    : '';
+
+                                                return (
+
+                                                    <div
+                                                        key={index}
+                                                        style={{
+                                                            display: 'flex',
+
+                                                            gap: '20px',
+
+                                                            marginBottom: '32px',
+
+                                                            paddingBottom: '24px',
+
+                                                            borderBottom: '1px solid #E5E7EB',
+
+                                                            // Better layout alignment
+                                                            alignItems: 'flex-start',
+
+                                                            // Prevent too much stretching
+                                                            maxWidth: '900px'
+                                                        }}
+                                                    >
+
+                                                        {/* Profile Circle */}
+
+                                                        <div
+                                                            style={{
+                                                                width: '56px',
+                                                                height: '56px',
+                                                                borderRadius: '50%',
+                                                                background: '#111827',
+                                                                color: '#fff',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontWeight: '700',
+                                                                fontSize: '18px',
+                                                                flexShrink: 0
+                                                            }}
+                                                        >
+                                                            {initials}
+                                                        </div>
+
+                                                        {/* Review Content */}
+
+                                                        <div
+                                                            style={{
+                                                                flex: 1
+                                                            }}
+                                                        >
+
+                                                            {/* Username */}
+
+                                                            <h4
+                                                                style={{
+                                                                    marginBottom: '8px',
+                                                                    fontSize: '18px',
+                                                                    fontWeight: '700',
+                                                                    color: '#111827'
+                                                                }}
+                                                            >
+                                                                {review.username}
+                                                            </h4>
+
+                                                            {/* Rating + Date */}
+
+                                                            <div
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '12px',
+                                                                    marginBottom: '12px'
+                                                                }}
+                                                            >
+
+                                                                {/* Stars */}
+
+                                                                <div
+                                                                    style={{
+                                                                        color: '#F59E0B',
+                                                                        fontSize: '18px'
+                                                                    }}
+                                                                >
+                                                                    {"★".repeat(Math.floor(review.rating))}
+                                                                    {"☆".repeat(
+                                                                        5 - Math.floor(review.rating)
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Date */}
+
+                                                                <span
+                                                                    style={{
+                                                                        color: '#6B7280',
+                                                                        fontSize: '14px'
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        new Date(
+                                                                            review.createdDate
+                                                                        ).toLocaleDateString()
+                                                                    }
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Review */}
+
+                                                            <p
+                                                                style={{
+                                                                    color: '#374151',
+
+                                                                    lineHeight: '1.8',
+
+                                                                    fontSize: '18px',
+
+                                                                    marginTop: '8px',
+
+                                                                    // Prevent overflow
+                                                                    wordBreak: 'break-word',
+
+                                                                    overflowWrap: 'break-word',
+
+                                                                    whiteSpace: 'normal',
+
+                                                                    // Better readability
+                                                                    maxWidth: '750px'
+                                                                }}
+                                                            >
+                                                                {
+                                                                    review.review ||
+                                                                    "No review comment"
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+
+                                        ) : (
+
+                                            <p>No reviews available</p>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -447,6 +850,310 @@ const CoursePlayer = () => {
                     </div>
                 </aside>
             </main>
+            {/* Rating Popup */}
+
+            {
+                showRatingPopup && (
+
+                    <>
+
+                        <div
+                            style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                background: 'rgba(0,0,0,0.5)',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                zIndex: 9999
+                            }}
+                        >
+
+                            <div
+                                style={{
+                                    background: 'white',
+                                    padding: '30px',
+                                    borderRadius: '12px',
+                                    width: '400px',
+                                    maxWidth: '90%'
+                                }}
+                            >
+
+                                <h2
+                                    style={{
+                                        marginBottom: '10px',
+                                        color: '#111827'
+                                    }}
+                                >
+                                    🎉 Course Completed!
+                                </h2>
+
+                                <p
+                                    style={{
+                                        color: '#6B7280',
+                                        marginBottom: '20px'
+                                    }}
+                                >
+                                    Please rate this course
+                                </p>
+
+                                {/* Rating */}
+
+                                <label
+                                    style={{
+                                        fontWeight: '600',
+                                        display: 'block',
+                                        marginBottom: '8px'
+                                    }}
+                                >
+                                    Rating *
+                                </label>
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        gap: '8px',
+                                        alignItems: 'center',
+                                        marginTop: '12px'
+                                    }}
+                                >
+
+                                    {
+                                        [1, 2, 3, 4, 5].map((star) => (
+
+                                            <div
+                                                key={star}
+                                                style={{
+                                                    position: 'relative',
+                                                    fontSize: '38px',
+                                                    cursor: 'pointer',
+                                                    color: '#D1D5DB'
+                                                }}
+                                            >
+
+                                                {/* Left Half Star */}
+
+                                                <span
+                                                    onClick={() =>
+                                                        setRating(star - 0.5)
+                                                    }
+                                                    style={{
+                                                        position: 'absolute',
+                                                        width: '50%',
+                                                        overflow: 'hidden',
+                                                        left: 0,
+                                                        top: 0,
+                                                        color:
+                                                            rating >= star - 0.5
+                                                                ? '#F59E0B'
+                                                                : '#D1D5DB'
+                                                    }}
+                                                >
+                                                    ★
+                                                </span>
+
+                                                {/* Full Star */}
+
+                                                <span
+                                                    onClick={() =>
+                                                        setRating(star)
+                                                    }
+                                                    style={{
+                                                        color:
+                                                            rating >= star
+                                                                ? '#F59E0B'
+                                                                : '#D1D5DB'
+                                                    }}
+                                                >
+                                                    ★
+                                                </span>
+                                            </div>
+                                        ))
+                                    }
+
+                                    {/* Display selected value */}
+
+                                    <span
+                                        style={{
+                                            marginLeft: '12px',
+                                            fontSize: '18px',
+                                            fontWeight: '600',
+                                            color: '#111827'
+                                        }}
+                                    >
+                                        {rating || 0}
+                                    </span>
+                                </div>
+
+                                {/* Review */}
+
+                                <label
+                                    style={{
+                                        fontWeight: '600',
+                                        display: 'block',
+                                        marginBottom: '8px'
+                                    }}
+                                >
+                                    Review (Optional)
+                                </label>
+
+                                <textarea
+                                    value={review}
+                                    onChange={(e) =>
+                                        setReview(e.target.value)
+                                    }
+                                    rows="4"
+                                    placeholder="Write your review..."
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        border: '1px solid #D1D5DB',
+                                        marginBottom: '20px',
+                                        resize: 'vertical'
+                                    }}
+                                />
+
+                                {/* Buttons */}
+
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'flex-end',
+                                        gap: '10px'
+                                    }}
+                                >
+
+                                    <button
+                                        onClick={() =>
+                                            setShowRatingPopup(false)
+                                        }
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #D1D5DB',
+                                            background: 'white',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Skip
+                                    </button>
+
+                                    <button
+                                        onClick={handleSubmitFeedback}
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            background: '#6366F1',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        Submit
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </>
+                )
+            }
+
+            {/* Premium Success Celebration */}
+
+            {
+                showSuccessCard && (
+
+                    <>
+
+                        {/* Confetti */}
+
+                        <Confetti
+
+                            width={window.innerWidth}
+
+                            height={window.innerHeight}
+
+                            numberOfPieces={350}
+
+                            recycle={false}
+
+                            gravity={0.25}
+                        />
+
+                        {/* Success Card */}
+
+                        <div
+                            style={{
+                                position: 'fixed',
+                                top: '50%',
+                                left: '50%',
+                                opacity: fadeOut ? 0 : 1,
+
+                                transform: fadeOut
+                                    ? 'translate(-50%, -50%) scale(0.92)'
+                                    : 'translate(-50%, -50%) scale(1)',
+
+                                transition:
+                                    'opacity 1.5s ease, transform 1.5s ease',
+
+                                background: 'white',
+                                padding: '40px',
+                                borderRadius: '20px',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+                                zIndex: 10000,
+                                textAlign: 'center',
+                                minWidth: '350px'
+                            }}
+                        >
+
+                            {/* Celebration Emoji */}
+
+                            <div
+                                style={{
+                                    fontSize: '70px',
+                                    marginBottom: '20px'
+                                }}
+                            >
+                                🎉
+                            </div>
+
+                            {/* Success Title */}
+
+                            <h2
+                                style={{
+                                    color: '#111827',
+                                    marginBottom: '12px',
+                                    fontSize: '28px'
+                                }}
+                            >
+                                Feedback Submitted!
+                            </h2>
+
+                            {/* Subtitle */}
+
+                            <p
+                                style={{
+                                    color: '#6B7280',
+                                    fontSize: '16px',
+                                    lineHeight: '1.6'
+                                }}
+                            >
+                                Course feedback submitted successfully.
+                                <br />
+                                Thank you for sharing your experience.
+                            </p>
+                        </div>
+                    </>
+                )
+            }
         </div>
     );
 };

@@ -164,7 +164,7 @@ const Sidebar = () => {
 const Header = () => {
     const navigate = useNavigate();
     const { managerProfile } = useData();
-    
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate('/');
@@ -987,6 +987,45 @@ const TeamMemberDetails = () => {
                                     <h3 className="employee-course-title" style={{ margin: 0, fontSize: '14px', flex: 1 }}>
                                         {course.courseName || course.title}
                                     </h3>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            marginTop: '6px',
+                                            marginBottom: '8px',
+                                            fontSize: '13px'
+                                        }}
+                                    >
+
+                                        <span
+                                            style={{
+                                                color: '#f59e0b'
+                                            }}
+                                        >
+                                            ⭐
+                                        </span>
+
+                                        <span
+                                            style={{
+                                                fontWeight: '600',
+                                                color: '#334155'
+                                            }}
+                                        >
+                                            {course.rating
+                                                ? Number(course.rating).toFixed(1)
+                                                : '0.0'}
+                                        </span>
+
+                                        <span
+                                            style={{
+                                                color: '#94a3b8'
+                                            }}
+                                        >
+                                            ({course.ratingCount || 0} ratings)
+                                        </span>
+
+                                    </div>
                                     <div className="employee-course-meta-item" style={{ fontSize: '10px', color: '#94a3b8', whiteSpace: 'nowrap', marginLeft: '8px' }}>
                                         <Clock size={12} />
                                         <span>{course.duration || "N/A"}</span>

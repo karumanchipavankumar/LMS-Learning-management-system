@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         // System.out.println(user.getRole());
-        return jwtUtil.generateToken(user.getUsername(), user.getRole());
+        return jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
         System.out.println("UserServiceImpl: form.isSendWelcomeEmail() = " + form.isSendWelcomeEmail());
         if (form.isSendWelcomeEmail() && form.getEmail() != null && !form.getEmail().isEmpty()) {
             System.out.println("UserServiceImpl: Triggering welcome email...");
-            
+
             // Generate reset token for new user
             String token = UUID.randomUUID().toString();
             tokenRepository.deleteByUser(savedUser);
@@ -123,7 +123,8 @@ public class UserServiceImpl implements UserService {
             tokenRepository.save(resetToken);
             String resetLink = frontendUrl + "/reset-password?token=" + token;
 
-            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(), resetLink);
+            emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(),
+                    resetLink);
         } else {
             System.out.println("UserServiceImpl: Welcome email skipped. Condition not met.");
         }
@@ -165,9 +166,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void createPasswordResetTokenForUser(String email) {
         System.out.println("UserService: Password reset requested for email: " + email);
-        
+
         String normalizedEmail = email.trim().toLowerCase();
-        
+
         if (!normalizedEmail.endsWith("@oryfolks.com")) {
             System.err.println("UserService: Domain validation failed for: " + normalizedEmail);
             throw new RuntimeException("Only @oryfolks.com emails are allowed for password reset.");
@@ -175,19 +176,19 @@ public class UserServiceImpl implements UserService {
 
         UserProfile profile = userProfileRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new RuntimeException("Email not found: " + normalizedEmail));
-        
+
         User user = profile.getUser();
         String token = UUID.randomUUID().toString();
-        
+
         PasswordResetToken resetToken = tokenRepository.findByUser(user)
                 .orElse(new PasswordResetToken());
-        
+
         resetToken.setUser(user);
         resetToken.setToken(token);
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(24));
-        
+
         tokenRepository.save(resetToken);
-        
+
         String resetLink = frontendUrl + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(normalizedEmail, resetLink);
     }
@@ -197,12 +198,12 @@ public class UserServiceImpl implements UserService {
     public void validateAndResetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or missing token"));
-                
+
         if (resetToken.isExpired()) {
             tokenRepository.delete(resetToken);
             throw new RuntimeException("Token has expired");
         }
-        
+
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -214,11 +215,11 @@ public class UserServiceImpl implements UserService {
     public void changeUserPassword(String username, String oldPassword, String newPassword) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-                
+
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new RuntimeException("Incorrect current password");
         }
-        
+
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
