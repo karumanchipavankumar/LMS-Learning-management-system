@@ -18,10 +18,14 @@ import com.oryfolks.lms_backend.DTO.AddUserForm;
 import com.oryfolks.lms_backend.DTO.UserManagementDTO;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import com.oryfolks.lms_backend.DTO.UserManagementDTO;
+import com.oryfolks.lms_backend.repository.NotificationRepository;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 public class AdminUserService {
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private UserRepository userRepository;
@@ -49,6 +53,9 @@ public class AdminUserService {
 
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private com.oryfolks.lms_backend.repository.EmployeeContentProgressRepository employeeContentProgressRepository;
@@ -102,6 +109,14 @@ public class AdminUserService {
         } else {
             System.out.println("AdminUserService: Welcome email skipped. Condition not met.");
         }
+
+        // Publish UserCreatedEvent for Admins
+        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.UserCreatedEvent(
+                this,
+                "User Created",
+                "A new user *" + savedUser.getUsername() + "* with role *" + savedUser.getRole() + "* has been added to the system.",
+                savedUser.getId()
+        ));
     }
 
     public List<UserManagementDTO> getAllUsers() {
@@ -137,7 +152,8 @@ public class AdminUserService {
         }
 
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found");
+            System.out.println("AdminUserService: User " + id + " not found, skipping deletion.");
+            return;
         }
 
         System.out.println("AdminUserService: Starting thorough deletion for user ID: " + id);
@@ -158,9 +174,30 @@ public class AdminUserService {
         employeeContentProgressRepository.deleteByEmployeeId(id);
         System.out.println("AdminUserService: Deleted employee content progress records.");
 
-        // 5. Delete user (cascades to UserProfile via JPA)
+        // 5. Delete notifications
+        notificationRepository.deleteByRecipientId(id);
+        System.out.println("AdminUserService: Deleted user notifications.");
+
+        // 6. Delete password reset tokens
+        User user = userRepository.findById(id).orElse(null);
+        String username = user != null ? user.getUsername() : "Unknown";
+        String role = user != null ? user.getRole() : "Unknown";
+        if (user != null) {
+            tokenRepository.deleteByUser(user);
+            System.out.println("AdminUserService: Deleted password reset tokens.");
+        }
+
+        // 7. Delete user (cascades to UserProfile via JPA)
         userRepository.deleteById(id);
         System.out.println("AdminUserService: Deleted user and profile record.");
+
+        // Publish UserDeletedEvent for Admins
+        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.UserDeletedEvent(
+                this,
+                "User Deleted",
+                "User *" + username + "* with role *" + role + "* has been deleted from the system.",
+                id
+        ));
     }
 
 }

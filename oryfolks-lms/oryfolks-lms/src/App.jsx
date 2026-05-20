@@ -27,6 +27,7 @@ function App() {
                 {/* Admin Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/notifications" element={<AdminDashboard activeTabDefault="Notifications" />} />
                     <Route path="/admin/add-user" element={<AddUser />} />
                     <Route path="/admin/courses/add" element={<AddCourse />} />
                     <Route path="/admin/all-assigned-courses" element={<AllAssignedCourses />} />

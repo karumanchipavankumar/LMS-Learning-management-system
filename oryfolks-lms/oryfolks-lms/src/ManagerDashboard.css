@@ -229,6 +229,47 @@
     filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
 }
 
+/* Sidebar Badge */
+.sidebar-badge {
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    animation: badge-pulse 2s infinite;
+}
+
+@keyframes badge-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* My Team Highlighting */
+.new-member-row {
+    background-color: rgba(37, 99, 235, 0.08) !important;
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.new-member-row td {
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+
+.highlight-course {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* Header */
 .app-header {
     height: auto;

@@ -37,11 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
                 String token = authHeader.substring(7).trim();
-                System.out.println("JwtAuthenticationFilter: Processing token");
-
                 String username = jwtUtil.extractUsername(token);
                 
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (username != null) {
                     if (jwtUtil.validateToken(token)) {
                         try {
                             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -50,8 +48,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     userDetails,
                                     null,
                                     userDetails.getAuthorities());
-
-                            System.out.println("JwtAuthenticationFilter: Authenticated user: " + username + " with authorities: " + userDetails.getAuthorities());
 
                             SecurityContextHolder.getContext().setAuthentication(authentication);
                         } catch (Exception e) {
@@ -66,6 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Ensure thread-local context is cleared after the request finishes to prevent leak across browsers/sessions
+            SecurityContextHolder.clearContext();
+        }
     }
 }

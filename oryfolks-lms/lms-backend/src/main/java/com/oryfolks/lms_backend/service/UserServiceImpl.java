@@ -19,6 +19,9 @@ import java.util.UUID;
 
 import com.oryfolks.lms_backend.DTO.AddUserForm;
 import com.oryfolks.lms_backend.config.JwtUtil;
+import com.oryfolks.lms_backend.event.NotificationEvent;
+import com.oryfolks.lms_backend.entity.NotificationType;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,6 +50,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -72,6 +78,15 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Reset",
+                "Your password has been successfully reset by an administrator.",
+                null
+        ));
     }
 
     @Transactional
@@ -93,7 +108,22 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(form.getPassword()));
         user.setRole(form.getRole());
 
+        if ("EMPLOYEE".equals(form.getRole())) {
+            user.setViewedByManager(false);
+        }
+
         User savedUser = userRepository.save(user);
+
+        if ("EMPLOYEE".equals(form.getRole())) {
+            String fullName = (form.getFirstName() + " " + (form.getLastName() != null ? form.getLastName() : "")).trim();
+            eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerNotificationEvent(
+                    this,
+                    NotificationType.NEW_EMPLOYEE_ADDED,
+                    "New Employee Added",
+                    "A new employee has been added: *" + fullName + "*",
+                    savedUser.getId()
+            ));
+        }
 
         // Create User Profile (Profile table)
         UserProfile profile = new UserProfile();
@@ -128,6 +158,14 @@ public class UserServiceImpl implements UserService {
         } else {
             System.out.println("UserServiceImpl: Welcome email skipped. Condition not met.");
         }
+
+        // Publish UserCreatedEvent for Admins
+        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.UserCreatedEvent(
+                this,
+                "User Created",
+                "A new user *" + savedUser.getUsername() + "* with role *" + savedUser.getRole() + "* has been added to the system.",
+                savedUser.getId()
+        ));
     }
 
     @Override
@@ -208,6 +246,23 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         tokenRepository.delete(resetToken);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Reset Successful",
+                "Your password has been successfully reset using the token.",
+                null
+        ));
+
+        // ALSO publish PasswordChangedEvent for Admins
+        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.PasswordChangedEvent(
+                this,
+                "User Password Reset",
+                "User *" + user.getUsername() + "* (" + user.getRole() + ") has reset their password.",
+                user.getId()
+        ));
     }
 
     @Override
@@ -222,5 +277,22 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Changed",
+                "Your password was changed successfully.",
+                null
+        ));
+
+        // ALSO publish PasswordChangedEvent for Admins
+        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.PasswordChangedEvent(
+                this,
+                "User Password Changed",
+                "User *" + user.getUsername() + "* (" + user.getRole() + ") has updated their password.",
+                user.getId()
+        ));
     }
 }

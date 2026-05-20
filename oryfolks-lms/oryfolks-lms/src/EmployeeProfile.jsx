@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 import { ArrowLeft } from 'lucide-react';
 import './EmployeeProfile.css';
+import NotificationsPage from './NotificationsPage';
 
 const EmployeeProfile = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [profile, setProfile] = useState({
         firstName: '',
         lastName: '',
@@ -29,6 +31,14 @@ const EmployeeProfile = () => {
     const [passwordError, setPasswordError] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const tab = queryParams.get('tab');
+        if (tab) {
+            setActiveTab(tab);
+        }
+    }, [location]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -198,7 +208,7 @@ const EmployeeProfile = () => {
                             </svg>
                             <span>Account Security</span>
                         </button>
-                        <button className="profile-nav-item">
+                        <button className={`profile-nav-item ${activeTab === 'notifications' ? 'active' : ''}`} onClick={() => setActiveTab('notifications')}>
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
@@ -240,7 +250,7 @@ const EmployeeProfile = () => {
                                     <polyline points="12 19 5 12 12 5"></polyline>
                                 </svg>
                             </button>
-                            <h2>{activeTab === 'profile' ? 'My Profile' : 'Account Security'}</h2>
+                            <h2>{activeTab === 'profile' ? 'My Profile' : activeTab === 'security' ? 'Account Security' : 'Notifications'}</h2>
                         </div>
                     </div>
 
@@ -364,6 +374,12 @@ const EmployeeProfile = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    )}
+
+                    {activeTab === 'notifications' && (
+                        <div style={{ padding: '0px' }}>
+                            <NotificationsPage />
                         </div>
                     )}
                 </main>

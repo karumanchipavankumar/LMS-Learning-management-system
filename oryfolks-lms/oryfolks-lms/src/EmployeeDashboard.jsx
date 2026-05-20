@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Search, CheckCircle, Clock } from 'lucide-react';
 import './EmployeeDashboard.css';
 import logo from './assets/logo.png';
+import NotificationBell from './NotificationBell';
 
 const EmployeeDashboard = () => {
     const navigate = useNavigate();
@@ -418,6 +419,8 @@ const EmployeeDashboard = () => {
                     >
                         My Learning
                     </span>
+
+                    <NotificationBell />
 
                     <button
                         className="employee-profile-button"

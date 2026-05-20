@@ -11,4 +11,6 @@ public class TeamMemberDTO {
     private String name;
     private String email;
     private List<AssignedCourseDTO> assignedCourses;
+    private boolean viewedByManager;
+    private java.time.LocalDateTime createdAt;
 }

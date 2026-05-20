@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @org.springframework.boot.autoconfigure.domain.EntityScan(basePackages = "com.oryfolks.lms_backend.entity")
 @org.springframework.data.jpa.repository.config.EnableJpaRepositories(basePackages = "com.oryfolks.lms_backend.repository")
+@org.springframework.scheduling.annotation.EnableScheduling
 public class LmsBackendApplication {
 
 	public static void main(String[] args) {

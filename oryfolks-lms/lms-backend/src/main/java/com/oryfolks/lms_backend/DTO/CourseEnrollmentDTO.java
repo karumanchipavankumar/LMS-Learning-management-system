@@ -22,4 +22,5 @@ public class CourseEnrollmentDTO {
     private String thumbnailUrl;
     private String duration;
     private String description;
+    private boolean viewedByManager;
 }

@@ -57,7 +57,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS Configuration (frontend 5173 → backend 8080)
+    // CORS Configuration (frontend 5173 and 5174 → backend 8080)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -66,6 +66,7 @@ public class SecurityConfig {
             "http://localhost:5173",
             frontendUrl
         ));
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));

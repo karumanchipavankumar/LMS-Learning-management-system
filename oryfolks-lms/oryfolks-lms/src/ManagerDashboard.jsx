@@ -11,6 +11,8 @@ import './ManagerDashboard.css';
 import './CourseManagement.css'; // Import shared styles for pill search
 import logo from './assets/logo.png';
 import ManagerProfile from './ManagerProfile';
+import NotificationBell from './NotificationBell';
+import NotificationsPage from './NotificationsPage';
 
 // --- Data Context ---
 
@@ -22,6 +24,19 @@ const DataProvider = ({ children }) => {
 
     // Initial dummy data for team members
     const [teamMembers, setTeamMembers] = useState([]);
+    const [unreadCounts, setUnreadCounts] = useState({ notifications: 0, enrollments: 0, team: 0 });
+
+    const fetchUnreadCounts = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:8080/manager/unread-counts", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUnreadCounts(response.data);
+        } catch (err) {
+            console.error("Error fetching unread counts", err);
+        }
+    };
 
     const fetchEmployees = async () => {
         try {
@@ -52,6 +67,11 @@ const DataProvider = ({ children }) => {
     useEffect(() => {
         fetchEmployees();
         fetchProfile();
+        fetchUnreadCounts();
+        
+        // Polling for unread counts every 5 seconds
+        const interval = setInterval(fetchUnreadCounts, 5000);
+        return () => clearInterval(interval);
     }, []);
 
 
@@ -118,7 +138,10 @@ const DataProvider = ({ children }) => {
     };
 
     return (
-        <DataContext.Provider value={{ teamMembers, courses, assignCourseToMembers, fetchEmployees, managerProfile }}>
+        <DataContext.Provider value={{ 
+            teamMembers, courses, assignCourseToMembers, fetchEmployees, 
+            managerProfile, unreadCounts, fetchUnreadCounts 
+        }}>
             {children}
         </DataContext.Provider>
     );
@@ -126,12 +149,15 @@ const DataProvider = ({ children }) => {
 // --- Components ---
 
 const Sidebar = () => {
+    const { unreadCounts } = useData();
+
     // Note: Paths are relative to the parent route /manager
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '.', end: true },
-        { icon: Users, label: 'My Team', path: 'my-team' },
+        { icon: Users, label: 'My Team', path: 'my-team', count: unreadCounts.team },
         { icon: BookOpen, label: 'Assign Courses', path: 'course-management' },
-        { icon: CheckCircle, label: 'Course Enrollment', path: 'enrollments' },
+        { icon: CheckCircle, label: 'Course Enrollment', path: 'enrollments', count: unreadCounts.enrollments },
+        { icon: Bell, label: 'Notifications', path: 'notifications', count: unreadCounts.notifications },
         { icon: FileText, label: 'Reports', path: 'reports' },
     ];
 
@@ -150,8 +176,13 @@ const Sidebar = () => {
                                 end={item.end}
                                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                             >
-                                <item.icon size={20} />
-                                <span>{item.label}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                    <item.icon size={20} />
+                                    <span>{item.label}</span>
+                                </div>
+                                {item.count > 0 && (
+                                    <span className="sidebar-badge">{item.count}</span>
+                                )}
                             </NavLink>
                         </li>
                     ))}
@@ -178,6 +209,7 @@ const Header = () => {
                 <h1 className="header-title">Welcome, {firstName}!</h1>
             </div>
             <div className="header-actions">
+                <NotificationBell dashboardType="manager" />
                 <button className="icon-btn" onClick={() => navigate('/manager/profile')} title="Profile">
                     <User size={24} />
                 </button>
@@ -746,8 +778,23 @@ const DashboardHome = () => {
 
 const MyTeam = () => {
     const navigate = useNavigate();
-    const { teamMembers } = useData();
+    const { teamMembers, fetchEmployees, fetchUnreadCounts } = useData();
     const [searchTerm, setSearchTerm] = useState('');
+
+    const handleMemberClick = async (memberId) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.put(`http://localhost:8080/manager/team/${memberId}/mark-viewed`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchEmployees();
+            fetchUnreadCounts();
+            navigate(`/manager/my-team/${memberId}`);
+        } catch (err) {
+            console.error("Error marking member as viewed", err);
+            navigate(`/manager/my-team/${memberId}`);
+        }
+    };
 
     // Filter members based on search term
     const filteredMembers = teamMembers.filter(member => {
@@ -823,8 +870,8 @@ const MyTeam = () => {
                             return (
                                 <tr
                                     key={member.id}
-                                    onClick={() => navigate(`${member.id}`)}
-                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => handleMemberClick(member.id)}
+                                    style={{ cursor: 'pointer', backgroundColor: !member.viewedByManager ? '#fef2f2' : 'transparent' }}
                                 >
                                     <td>{index + 1}</td>
                                     <td>
@@ -1455,6 +1502,7 @@ const CourseAssignment = () => {
 
 
 const CourseEnrollments = () => {
+    const { fetchUnreadCounts } = useData();
     const [enrollments, setEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('PENDING');
@@ -1472,12 +1520,17 @@ const CourseEnrollments = () => {
     const fetchEnrollments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/manager/enrollments?status=${filterStatus}`, {
+            const response = await axios.get(`http://localhost:8080/manager/enrollments?status=${filterStatus}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setEnrollments(data);
+            setEnrollments(response.data);
+            
+            // Mark all as viewed when viewing the page
+            if (response.data.some(e => !e.viewedByManager && e.status === 'PENDING')) {
+                await axios.put("http://localhost:8080/manager/enrollments/mark-all-viewed", {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                fetchUnreadCounts();
             }
         } catch (error) {
             console.error("Error fetching enrollments:", error);
@@ -1556,7 +1609,7 @@ const CourseEnrollments = () => {
                     <tbody>
                         {enrollments.length > 0 ? (
                             enrollments.map((enrollment, index) => (
-                                <tr key={enrollment.id}>
+                                <tr key={enrollment.id} style={{ backgroundColor: !enrollment.viewedByManager ? '#fef2f2' : 'transparent' }}>
                                     <td>{index + 1}</td>
                                     <td>{enrollment.courseId}</td>
                                     <td style={{ fontWeight: 500, color: '#1f2937' }}>{enrollment.courseName}</td>
@@ -1646,6 +1699,7 @@ function ManagerDashboard() {
                     <Route path="course-management" element={<CourseManagement />} />
                     <Route path="course-management/:courseId" element={<CourseAssignment />} />
                     <Route path="enrollments" element={<CourseEnrollments />} />
+                    <Route path="notifications" element={<NotificationsPage dashboardType="manager" />} />
                     <Route path="reports" element={<PlaceholderPage title="Reports" />} />
                     <Route path="settings" element={<PlaceholderPage title="Settings" />} />
                 </Route>

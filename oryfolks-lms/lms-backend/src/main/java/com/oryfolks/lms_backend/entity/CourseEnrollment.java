@@ -37,4 +37,7 @@ public class CourseEnrollment {
     private LocalDateTime requestDate;
 
     private LocalDateTime responseDate;
+
+    @Column(nullable = false)
+    private boolean viewedByManager = false;
 }

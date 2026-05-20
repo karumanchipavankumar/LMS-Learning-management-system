@@ -59,6 +59,9 @@ public class CourseServiceImpl implements CourseService {
         @Autowired
         private EmployeeContentProgressRepository employeeContentProgressRepository;
 
+        @Autowired
+        private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
         @Override
         public void createCourse(CourseRequestDTO dto,
                         MultipartFile thumbnail,
@@ -97,6 +100,23 @@ public class CourseServiceImpl implements CourseService {
                 if (videoContents != null && !videoContents.isBlank()) {
                         parseAndSaveContents(videoContents, courseVideo);
                 }
+
+                // Notify managers about new course
+                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerNotificationEvent(
+                        this,
+                        com.oryfolks.lms_backend.entity.NotificationType.NEW_COURSE_ADDED,
+                        "New Course Added",
+                        "A new course has been added: *" + savedCourse.getTitle() + "* in category *" + savedCourse.getCategory() + "*",
+                        savedCourse.getId()
+                ));
+
+                // Notify admins about new course
+                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.CourseCreatedEvent(
+                        this,
+                        "Course Created",
+                        "A new course *" + savedCourse.getTitle() + "* in category *" + savedCourse.getCategory() + "* has been successfully created.",
+                        savedCourse.getId()
+                ));
         }
 
         private void parseAndSaveContents(String contentStr, CourseVideo video) {
@@ -416,6 +436,21 @@ public class CourseServiceImpl implements CourseService {
 
                 if (finalProgress == 100) {
                         employeeCourse.setStatus("COMPLETED");
+                        
+                        com.oryfolks.lms_backend.entity.Course c = courseRepository.findById(courseId).orElse(null);
+                        String courseTitle = c != null ? c.getTitle() : "a course";
+                        
+                        com.oryfolks.lms_backend.entity.User employee = userRepository.findById(employeeId).orElse(null);
+                        String empName = employee != null ? employee.getUsername() : "An employee";
+
+                        eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerNotificationEvent(
+                                this,
+                                com.oryfolks.lms_backend.entity.NotificationType.COURSE_COMPLETION,
+                                "Course Completed",
+                                empName + " has completed the course: '" + courseTitle + "'",
+                                courseId
+                        ));
+
                 } else if (finalProgress > 0) {
                         employeeCourse.setStatus("IN_PROGRESS");
                 }
@@ -447,8 +482,18 @@ public class CourseServiceImpl implements CourseService {
                 System.out.println("CourseServiceImpl: Deleted course videos.");
 
                 // 5. Finally delete the course
+                Course course = courseRepository.findById(id).orElse(null);
+                String courseTitle = course != null ? course.getTitle() : "Unknown Course";
                 courseRepository.deleteById(id);
                 System.out.println("CourseServiceImpl: Deleted course record.");
+
+                // Publish CourseDeletedEvent for Admins
+                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.CourseDeletedEvent(
+                        this,
+                        "Course Deleted",
+                        "Course *" + courseTitle + "* has been deleted from the system.",
+                        id
+                ));
         }
 
         @Override
@@ -482,6 +527,21 @@ public class CourseServiceImpl implements CourseService {
                                 existingEnrollment.setStatus("PENDING");
                                 existingEnrollment.setRequestDate(java.time.LocalDateTime.now());
                                 courseEnrollmentRepository.save(existingEnrollment);
+
+                                com.oryfolks.lms_backend.entity.Course c = courseRepository.findById(courseId).orElse(null);
+                                String courseTitle = c != null ? c.getTitle() : "a course";
+                                
+                                com.oryfolks.lms_backend.entity.User employee = userRepository.findById(employeeId).orElse(null);
+                                String empName = employee != null ? employee.getUsername() : "An employee";
+
+                                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerNotificationEvent(
+                                        this,
+                                        com.oryfolks.lms_backend.entity.NotificationType.ENROLLMENT_REQUEST_RECEIVED,
+                                        "Enrollment Request Re-opened",
+                                        empName + " re-requested enrollment for '" + courseTitle + "'",
+                                        existingEnrollment.getId()
+                                ));
+
                                 return;
                         } else if ("APPROVED".equals(existingEnrollment.getStatus())) {
                                 throw new RuntimeException("Course already assigned");
@@ -494,7 +554,21 @@ public class CourseServiceImpl implements CourseService {
                 enrollment.setStatus("PENDING");
                 enrollment.setRequestDate(java.time.LocalDateTime.now());
 
-                courseEnrollmentRepository.save(enrollment);
+                com.oryfolks.lms_backend.entity.CourseEnrollment saved = courseEnrollmentRepository.save(enrollment);
+
+                com.oryfolks.lms_backend.entity.Course c = courseRepository.findById(courseId).orElse(null);
+                String courseTitle = c != null ? c.getTitle() : "a course";
+                
+                com.oryfolks.lms_backend.entity.User employee = userRepository.findById(employeeId).orElse(null);
+                String empName = employee != null ? employee.getUsername() : "An employee";
+
+                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerNotificationEvent(
+                        this,
+                        com.oryfolks.lms_backend.entity.NotificationType.ENROLLMENT_REQUEST_RECEIVED,
+                        "Enrollment Request",
+                        empName + " requested enrollment for '" + courseTitle + "'",
+                        saved.getId()
+                ));
         }
 
         @Override
@@ -521,7 +595,8 @@ public class CourseServiceImpl implements CourseService {
                                                         enrollment.getResponseDate(),
                                                         course != null ? course.getThumbnailUrl() : null,
                                                         course != null ? course.getDuration() : "N/A",
-                                                        course != null ? course.getDescription() : "No description");
+                                                        course != null ? course.getDescription() : "No description",
+                                                        enrollment.isViewedByManager());
                                 })
                                 .toList();
         }

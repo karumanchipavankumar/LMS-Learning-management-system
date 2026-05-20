@@ -7,18 +7,39 @@ import './AdminDashboard.css';
 import logo from './assets/logo.png';
 import UserManagement from './UserManagement';
 import CourseManagement from './CourseManagement';
+import NotificationBell from './NotificationBell';
+import NotificationsPage from './NotificationsPage';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ activeTabDefault }) => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('Dashboard');
+    const [activeTab, setActiveTab] = useState(activeTabDefault || 'Dashboard');
     const [stats, setStats] = useState({
         totalMembers: 0,
         published: 0,
         avgCompletion: 0
     });
     const [recentAssignments, setRecentAssignments] = useState([]);
+    const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
     const location = useLocation();
+
+    const fetchUnreadNotificationsCount = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:8080/notifications/unread-count", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUnreadNotificationsCount(response.data.count);
+        } catch (error) {
+            console.error("Error fetching unread notifications count:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTabDefault) {
+            setActiveTab(activeTabDefault);
+        }
+    }, [activeTabDefault]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -30,11 +51,14 @@ const AdminDashboard = () => {
         // Handle tab navigation from other pages
         if (location.state?.activeTab) {
             setActiveTab(location.state.activeTab);
-            // Clear state to prevent stuck tab on refresh (optional but good practice)
+            // Clear state to prevent stuck tab on refresh
             window.history.replaceState({}, document.title);
         }
 
         fetchDashboardData();
+        fetchUnreadNotificationsCount();
+        const intervalId = setInterval(fetchUnreadNotificationsCount, 5000); // Poll every 5 seconds for real-time responsiveness
+        return () => clearInterval(intervalId);
     }, [location.state]);
 
     const fetchDashboardData = async () => {
@@ -97,10 +121,30 @@ const AdminDashboard = () => {
                         <button
                             key={item.name}
                             className={`nav-item ${activeTab === item.name ? 'active' : ''}`}
-                            onClick={() => setActiveTab(item.name)}
+                            onClick={() => {
+                                setActiveTab(item.name);
+                                if (item.name === 'Notifications') {
+                                    navigate('/admin/notifications');
+                                } else {
+                                    navigate('/admin');
+                                }
+                            }}
                         >
                             <item.icon size={20} />
                             <span>{item.name}</span>
+                            {item.name === 'Notifications' && unreadNotificationsCount > 0 && (
+                                <span style={{
+                                    backgroundColor: '#ef4444',
+                                    color: 'white',
+                                    borderRadius: '9999px',
+                                    padding: '2px 8px',
+                                    fontSize: '11px',
+                                    fontWeight: '700',
+                                    marginLeft: 'auto'
+                                }}>
+                                    {unreadNotificationsCount}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </nav>
@@ -110,7 +154,8 @@ const AdminDashboard = () => {
             <div className="main-content">
                 <header className="dashboard-header">
                     <h1>Welcome, Admin!</h1>
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <NotificationBell dashboardType="admin" />
                         <button className="icon-button" onClick={handleLogout} title="Logout">
                             <LogOut size={20} />
                         </button>
@@ -262,6 +307,7 @@ const AdminDashboard = () => {
 
                     {activeTab === 'User Management' && <UserManagement onBack={() => setActiveTab('Dashboard')} />}
                     {activeTab === 'Course Management' && <CourseManagement onBack={() => setActiveTab('Dashboard')} />}
+                    {activeTab === 'Notifications' && <NotificationsPage dashboardType="admin" />}
                 </div>
             </div>
         </div>

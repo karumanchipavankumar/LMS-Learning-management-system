@@ -10,6 +10,9 @@ import com.oryfolks.lms_backend.DTO.AssignedCourseDTO;
 import com.oryfolks.lms_backend.DTO.TeamMemberDTO;
 import com.oryfolks.lms_backend.entity.EmployeeCourse;
 import com.oryfolks.lms_backend.entity.User;
+import com.oryfolks.lms_backend.event.NotificationEvent;
+import com.oryfolks.lms_backend.entity.NotificationType;
+import org.springframework.context.ApplicationEventPublisher;
 import com.oryfolks.lms_backend.repository.CourseRepository;
 import com.oryfolks.lms_backend.repository.EmployeeCourseRepository;
 import com.oryfolks.lms_backend.repository.UserRepository;
@@ -19,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ManagerServiceImpl {
+public class ManagerServiceImpl implements ManagerService {
 
     private final UserRepository userRepository;
     private final EmployeeCourseRepository employeeCourseRepository;
@@ -27,6 +30,24 @@ public class ManagerServiceImpl {
     private final com.oryfolks.lms_backend.repository.CourseEnrollmentRepository courseEnrollmentRepository;
     private final EmailService emailService;
     private final CourseRatingRepository courseRatingRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService;
+
+    public java.util.Map<String, Long> getUnreadCounts(Long managerId) {
+        java.util.Map<String, Long> counts = new java.util.HashMap<>();
+        
+        counts.put("notifications", notificationService.getUnreadCount(managerId));
+        
+        counts.put("enrollments", courseEnrollmentRepository.findAll().stream()
+                .filter(ce -> !ce.isViewedByManager() && "PENDING".equals(ce.getStatus()))
+                .count());
+        
+        counts.put("team", userRepository.findByRole("EMPLOYEE").stream()
+                .filter(u -> !u.isViewedByManager())
+                .count());
+        
+        return counts;
+    }
 
     public void sendAssignmentReminder(Long courseId, Long employeeId) {
         if (courseId == null || employeeId == null) {
@@ -58,22 +79,38 @@ public class ManagerServiceImpl {
         // Update flag
         ec.setReminderSent(true);
         employeeCourseRepository.save(ec);
+
+        // Publish event
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                employeeId,
+                NotificationType.DEADLINE_REMINDER,
+                "Course Deadline Reminder",
+                "Reminder: Please complete the course '" + course.getTitle() + "' before the deadline.",
+                courseId
+        ));
     }
 
     public List<TeamMemberDTO> getMyTeam() {
 
         List<User> employees = userRepository.findByRole("EMPLOYEE");
+        
+        // Sort: Not viewed first, then by createdAt desc
+        employees.sort((u1, u2) -> {
+            if (u1.isViewedByManager() != u2.isViewedByManager()) {
+                return u1.isViewedByManager() ? 1 : -1;
+            }
+            if (u1.getCreatedAt() == null || u2.getCreatedAt() == null) return 0;
+            return u2.getCreatedAt().compareTo(u1.getCreatedAt());
+        });
+
         List<TeamMemberDTO> result = new ArrayList<>();
 
         for (User employee : employees) {
-
-            // employee.getId() is non-null (JPA guarantee)
             List<EmployeeCourse> employeeCourses = employeeCourseRepository.findByEmployeeId(employee.getId());
-
             List<AssignedCourseDTO> assignedCourses = new ArrayList<>();
 
             for (EmployeeCourse ec : employeeCourses) {
-
                 Long courseId = ec.getCourseId();
                 if (courseId != null) {
                     courseRepository.findById(courseId)
@@ -136,10 +173,42 @@ public class ManagerServiceImpl {
                             employee.getId(),
                             name,
                             email,
-                            assignedCourses));
+                            assignedCourses,
+                            employee.isViewedByManager(),
+                            employee.getCreatedAt()));
         }
 
         return result;
+    }
+
+    @Transactional
+    public void markTeamMemberAsViewed(Long id) {
+        userRepository.findById(id).ifPresent(user -> {
+            user.setViewedByManager(true);
+            userRepository.save(user);
+        });
+    }
+
+    @Transactional
+    public void markAllTeamAsViewed() {
+        List<User> unviewed = userRepository.findByRole("EMPLOYEE").stream()
+                .filter(u -> !u.isViewedByManager())
+                .collect(java.util.stream.Collectors.toList());
+        for (User u : unviewed) {
+            u.setViewedByManager(true);
+        }
+        userRepository.saveAll(unviewed);
+    }
+
+    @Transactional
+    public void markAllEnrollmentsAsViewed() {
+        List<com.oryfolks.lms_backend.entity.CourseEnrollment> unviewed = courseEnrollmentRepository.findAll().stream()
+                .filter(ce -> !ce.isViewedByManager() && "PENDING".equals(ce.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+        for (com.oryfolks.lms_backend.entity.CourseEnrollment ce : unviewed) {
+            ce.setViewedByManager(true);
+        }
+        courseEnrollmentRepository.saveAll(unviewed);
     }
 
     @Transactional
@@ -165,6 +234,38 @@ public class ManagerServiceImpl {
                     request.getEnrollmentType() != null ? request.getEnrollmentType() : "MANUAL_ASSIGNMENT");
 
             employeeCourseRepository.save(ec);
+
+            com.oryfolks.lms_backend.entity.Course course = courseRepository.findById(request.getCourseId())
+                    .orElse(null);
+            String courseTitle = course != null ? course.getTitle() : "a course";
+
+            if (!"SELF_ENROLLMENT".equals(request.getEnrollmentType())) {
+                eventPublisher.publishEvent(new NotificationEvent(
+                        this,
+                        employeeId,
+                        NotificationType.COURSE_ASSIGNED,
+                        "New Course Assigned",
+                        "You have been assigned to: *" + courseTitle + "*",
+                        request.getCourseId()
+                ));
+            }
+        }
+        
+        // Notify the manager who assigned the course
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+            userRepository.findByUsername(auth.getName()).ifPresent(manager -> {
+                com.oryfolks.lms_backend.entity.Course course = courseRepository.findById(request.getCourseId()).orElse(null);
+                String courseTitle = course != null ? course.getTitle() : "a course";
+                eventPublisher.publishEvent(new NotificationEvent(
+                        this,
+                        manager.getId(),
+                        NotificationType.COURSE_ASSIGNMENT_CONFIRMATION,
+                        "Course Assignment Confirmation",
+                        "You successfully assigned '" + courseTitle + "' to " + request.getEmployeeIds().size() + " employee(s).",
+                        request.getCourseId()
+                ));
+            });
         }
     }
 
@@ -226,7 +327,8 @@ public class ManagerServiceImpl {
                     enrollment.getResponseDate(),
                     course != null ? course.getThumbnailUrl() : null,
                     course != null ? course.getDuration() : "N/A",
-                    course != null ? course.getDescription() : "No description"));
+                    course != null ? course.getDescription() : "No description",
+                    enrollment.isViewedByManager()));
         }
         return dtos;
     }
@@ -255,6 +357,19 @@ public class ManagerServiceImpl {
         request.setEnrollmentType("SELF_ENROLLMENT");
 
         assignCourseToEmployees(request);
+
+        com.oryfolks.lms_backend.entity.Course course = courseRepository.findById(enrollment.getCourseId())
+                .orElse(null);
+        String courseTitle = course != null ? course.getTitle() : "a course";
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                enrollment.getEmployeeId(),
+                NotificationType.ENROLLMENT_APPROVED,
+                "Enrollment Approved",
+                "Your enrollment request for *" + courseTitle + "* has been approved.",
+                enrollment.getCourseId()
+        ));
     }
 
     public void rejectEnrollment(Long enrollmentId) {
@@ -271,6 +386,19 @@ public class ManagerServiceImpl {
         enrollment.setStatus("REJECTED");
         enrollment.setResponseDate(java.time.LocalDateTime.now());
         courseEnrollmentRepository.save(enrollment);
+
+        com.oryfolks.lms_backend.entity.Course course = courseRepository.findById(enrollment.getCourseId())
+                .orElse(null);
+        String courseTitle = course != null ? course.getTitle() : "a course";
+
+        eventPublisher.publishEvent(new NotificationEvent(
+                this,
+                enrollment.getEmployeeId(),
+                NotificationType.ENROLLMENT_REJECTED,
+                "Enrollment Rejected",
+                "Your enrollment request for '" + courseTitle + "' has been rejected.",
+                enrollment.getCourseId()
+        ));
     }
 
     public void seedEnrollments() {
