@@ -1547,7 +1547,7 @@ const CourseEnrollments = () => {
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`http://localhost:8080/manager/enrollments/${id}/${action}`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.ok) {

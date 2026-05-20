@@ -187,11 +187,16 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
                                             {n.type === 'DAILY_ENROLLMENT_SUMMARY' && '📊 '}
                                             {n.type === 'HIGH_ACTIVITY_ALERT' && '📈 '}
                                             {n.type === 'MANAGER_PENDING_APPROVAL' && '👤 '}
-                                            {n.type === 'PASSWORD_CHANGED' && '🔑 '}
                                             {n.type === 'COURSE_ASSIGNED' && '📋 '}
                                             {n.type === 'DEADLINE_REMINDER' && '⏰ '}
                                             {n.type === 'ENROLLMENT_APPROVED' && '✅ '}
                                             {n.type === 'ENROLLMENT_REJECTED' && '❌ '}
+                                            {n.type === 'ENROLLMENT_REQUEST_RECEIVED' && '📩 '}
+                                            {n.type === 'COURSE_COMPLETION' && '🎓 '}
+                                            {n.type === 'DEADLINE_MISSED' && '⚠️ '}
+                                            {n.type === 'COURSE_ASSIGNMENT_CONFIRMATION' && '✅ '}
+                                            {n.type === 'NEW_EMPLOYEE_ADDED' && '👥 '}
+                                            {n.type === 'NEW_COURSE_ADDED' && '📚 '}
                                             {n.title}
                                         </span>
                                         {!n.read && <span className="unread-dot"></span>}

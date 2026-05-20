@@ -29,9 +29,6 @@ public class AdminNotificationController {
         }
 
         switch (type.toUpperCase()) {
-            case "SYSTEM_ERROR":
-                eventPublisher.publishEvent(new SystemErrorEvent(this, title, message, relatedEntityId));
-                break;
             case "USER_CREATED":
                 eventPublisher.publishEvent(new UserCreatedEvent(this, title, message, relatedEntityId));
                 break;
@@ -44,38 +41,11 @@ public class AdminNotificationController {
             case "COURSE_DELETED":
                 eventPublisher.publishEvent(new CourseDeletedEvent(this, title, message, relatedEntityId));
                 break;
-            case "BULK_IMPORT_COMPLETED":
-                eventPublisher.publishEvent(new BulkImportCompletedEvent(this, title, message, relatedEntityId));
-                break;
-            case "BULK_UPLOAD_FAILED":
-                eventPublisher.publishEvent(new BulkUploadFailedEvent(this, title, message, relatedEntityId));
-                break;
-            case "SECURITY_ALERT":
-                eventPublisher.publishEvent(new SecurityAlertEvent(this, title, message, relatedEntityId));
-                break;
             case "DAILY_ENROLLMENT_SUMMARY":
                 eventPublisher.publishEvent(new DailyEnrollmentSummaryEvent(this, title, message, relatedEntityId));
                 break;
-            case "HIGH_ACTIVITY_ALERT":
-                eventPublisher.publishEvent(new HighActivityAlertEvent(this, title, message, relatedEntityId));
-                break;
             case "MANAGER_PENDING_APPROVAL":
                 eventPublisher.publishEvent(new ManagerPendingApprovalEvent(this, title, message, relatedEntityId));
-                break;
-            case "PASSWORD_CHANGED":
-                eventPublisher.publishEvent(new PasswordChangedEvent(this, title, message, relatedEntityId));
-                break;
-            case "COURSE_ASSIGNED":
-                eventPublisher.publishEvent(new AdminNotificationEvent(this, com.oryfolks.lms_backend.entity.NotificationType.COURSE_ASSIGNED, title, message, relatedEntityId));
-                break;
-            case "DEADLINE_REMINDER":
-                eventPublisher.publishEvent(new AdminNotificationEvent(this, com.oryfolks.lms_backend.entity.NotificationType.DEADLINE_REMINDER, title, message, relatedEntityId));
-                break;
-            case "ENROLLMENT_APPROVED":
-                eventPublisher.publishEvent(new AdminNotificationEvent(this, com.oryfolks.lms_backend.entity.NotificationType.ENROLLMENT_APPROVED, title, message, relatedEntityId));
-                break;
-            case "ENROLLMENT_REJECTED":
-                eventPublisher.publishEvent(new AdminNotificationEvent(this, com.oryfolks.lms_backend.entity.NotificationType.ENROLLMENT_REJECTED, title, message, relatedEntityId));
                 break;
             default:
                 return ResponseEntity.badRequest().body(Map.of("error", "Unknown simulation type: " + type));

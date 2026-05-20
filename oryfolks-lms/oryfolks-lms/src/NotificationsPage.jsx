@@ -12,26 +12,38 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const navigate = useNavigate();
 
-    // Available types for filtering
-    const notificationTypes = [
-        'ALL',
-        'SYSTEM_ERROR',
+    // Role-specific notification types for filtering
+    const adminTypes = [
         'USER_CREATED',
         'USER_DELETED',
         'COURSE_CREATED',
         'COURSE_DELETED',
-        'BULK_IMPORT_COMPLETED',
-        'BULK_UPLOAD_FAILED',
-        'SECURITY_ALERT',
         'DAILY_ENROLLMENT_SUMMARY',
-        'HIGH_ACTIVITY_ALERT',
-        'MANAGER_PENDING_APPROVAL',
-        'PASSWORD_CHANGED',
+        'MANAGER_PENDING_APPROVAL'
+    ];
+
+    const managerTypes = [
+        'ENROLLMENT_REQUEST_RECEIVED',
+        'COURSE_COMPLETION',
+        'DEADLINE_MISSED',
+        'COURSE_ASSIGNMENT_CONFIRMATION',
+        'NEW_EMPLOYEE_ADDED',
+        'NEW_COURSE_ADDED',
+        'DEADLINE_REMINDER'
+    ];
+
+    const employeeTypes = [
         'COURSE_ASSIGNED',
         'DEADLINE_REMINDER',
         'ENROLLMENT_APPROVED',
         'ENROLLMENT_REJECTED'
     ];
+
+    const allowedTypes = dashboardType === 'admin' ? adminTypes
+        : dashboardType === 'manager' ? managerTypes
+        : employeeTypes;
+
+    const notificationTypes = ['ALL', ...allowedTypes];
 
     const fetchNotifications = async () => {
         try {
@@ -156,6 +168,9 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
     };
 
     const filteredNotifications = notifications.filter(n => {
+        // Only show notification types allowed for this role
+        if (!allowedTypes.includes(n.type)) return false;
+
         // Read/Unread filter
         if (filter === 'UNREAD' && n.read) return false;
         if (filter === 'READ' && !n.read) return false;
@@ -272,11 +287,16 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
                                         {n.type === 'DAILY_ENROLLMENT_SUMMARY' && '📊'}
                                         {n.type === 'HIGH_ACTIVITY_ALERT' && '📈'}
                                         {n.type === 'MANAGER_PENDING_APPROVAL' && '👤'}
-                                        {n.type === 'PASSWORD_CHANGED' && '🔑'}
                                         {n.type === 'COURSE_ASSIGNED' && '📋'}
                                         {n.type === 'DEADLINE_REMINDER' && '⏰'}
                                         {n.type === 'ENROLLMENT_APPROVED' && '✅'}
                                         {n.type === 'ENROLLMENT_REJECTED' && '❌'}
+                                        {n.type === 'ENROLLMENT_REQUEST_RECEIVED' && '📩'}
+                                        {n.type === 'COURSE_COMPLETION' && '🎓'}
+                                        {n.type === 'DEADLINE_MISSED' && '⚠️'}
+                                        {n.type === 'COURSE_ASSIGNMENT_CONFIRMATION' && '✅'}
+                                        {n.type === 'NEW_EMPLOYEE_ADDED' && '👥'}
+                                        {n.type === 'NEW_COURSE_ADDED' && '📚'}
                                         {n.title}
                                     </span>
                                     {!n.read && <span className="unread-dot"></span>}

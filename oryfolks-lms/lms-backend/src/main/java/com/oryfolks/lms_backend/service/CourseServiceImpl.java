@@ -542,6 +542,13 @@ public class CourseServiceImpl implements CourseService {
                                         existingEnrollment.getId()
                                 ));
 
+                                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerPendingApprovalEvent(
+                                        this,
+                                        "Pending Manager Approval",
+                                        empName + " requested enrollment for '" + courseTitle + "'",
+                                        existingEnrollment.getId()
+                                ));
+
                                 return;
                         } else if ("APPROVED".equals(existingEnrollment.getStatus())) {
                                 throw new RuntimeException("Course already assigned");
@@ -566,6 +573,13 @@ public class CourseServiceImpl implements CourseService {
                         this,
                         com.oryfolks.lms_backend.entity.NotificationType.ENROLLMENT_REQUEST_RECEIVED,
                         "Enrollment Request",
+                        empName + " requested enrollment for '" + courseTitle + "'",
+                        saved.getId()
+                ));
+
+                eventPublisher.publishEvent(new com.oryfolks.lms_backend.event.ManagerPendingApprovalEvent(
+                        this,
+                        "Pending Manager Approval",
                         empName + " requested enrollment for '" + courseTitle + "'",
                         saved.getId()
                 ));
