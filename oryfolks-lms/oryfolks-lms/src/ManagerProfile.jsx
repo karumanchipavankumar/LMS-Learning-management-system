@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './EmployeeProfile.css';
+import { useData } from './ManagerDashboard';
 
 const ManagerProfile = () => {
     const navigate = useNavigate();
+    const { fetchProfile } = useData();
     const [profile, setProfile] = useState({
         firstName: '',
         lastName: '',
@@ -104,6 +106,9 @@ const ManagerProfile = () => {
             });
             setOriginalProfile(profile);
             setIsEditing(false);
+            if (fetchProfile) {
+                await fetchProfile();
+            }
             alert("Profile updated successfully!");
         } catch (error) {
             console.error("Error updating profile:", error);
@@ -149,15 +154,17 @@ const ManagerProfile = () => {
         }
     };
 
-    const getInitials = () => {
-        if (profile.firstName && profile.lastName) {
-            return (profile.firstName.charAt(0) + profile.lastName.charAt(0)).toUpperCase();
-        }
-        if (profile.firstName) {
-            return profile.firstName.substring(0, 2).toUpperCase();
-        }
-        return (profile.user?.username || 'U').substring(0, 2).toUpperCase();
+    const isValidImage = (photo) => {
+        if (!photo) return false;
+        const clean = photo.trim();
+        return clean.startsWith('data:image/') || clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/') || clean.startsWith('blob:');
     };
+
+    const getInitials = () => {
+        const firstChar = profile.firstName ? profile.firstName.charAt(0) : '';
+        return firstChar.toUpperCase() || (profile.user?.username || 'U').charAt(0).toUpperCase();
+    };
+
 
     if (loading) {
         return (
@@ -174,8 +181,12 @@ const ManagerProfile = () => {
                 {/* Left Sidebar */}
                 <aside className="profile-sidebar">
                     <div className="profile-user-info">
-                        <div className="profile-avatar-large">
-                            {getInitials()}
+                        <div className="profile-avatar-large" style={{ padding: isValidImage(profile.profilePhoto) ? 0 : undefined, overflow: 'hidden' }}>
+                            {isValidImage(profile.profilePhoto) ? (
+                                <img src={profile.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                getInitials()
+                            )}
                         </div>
                         <div className="profile-user-name">{profile.firstName} {profile.lastName}</div>
                         <div className="profile-user-email">{profile.email}</div>
@@ -242,13 +253,52 @@ const ManagerProfile = () => {
                     {activeTab === 'profile' && (
                         <>
 
-                    <div className="profile-avatar-upload-container">
-                        <div className="profile-cam-avatar">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="32" height="32">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
+                    <div className="profile-avatar-upload-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
+                        <label className="profile-cam-avatar" style={{ cursor: isEditing ? 'pointer' : 'default', overflow: 'hidden', padding: isValidImage(profile.profilePhoto) ? 0 : undefined, background: isValidImage(profile.profilePhoto) ? undefined : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', color: 'white', border: isValidImage(profile.profilePhoto) ? undefined : 'none' }}>
+                            {isValidImage(profile.profilePhoto) ? (
+                                <img src={profile.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <span style={{ fontSize: '32px', fontWeight: '700' }}>{getInitials()}</span>
+                            )}
+                            {isEditing && (
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setProfile(prev => ({ ...prev, profilePhoto: reader.result }));
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            )}
+                        </label>
+                        {isEditing && isValidImage(profile.profilePhoto) && (
+                            <button
+                                type="button"
+                                onClick={() => setProfile(prev => ({ ...prev, profilePhoto: '' }))}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#ef4444',
+                                    fontSize: '13px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    transition: 'background-color 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                Remove Photo
+                            </button>
+                        )}
                     </div>
 
                     <div className="profile-form-grid">

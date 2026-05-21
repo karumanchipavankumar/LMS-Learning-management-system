@@ -48,4 +48,7 @@ public class UserProfile {
     private String employeeId;
 
     private LocalDate dob;
+
+    @Column(columnDefinition = "TEXT")
+    private String profilePhoto;
 }

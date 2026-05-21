@@ -195,6 +195,10 @@ public class UserServiceImpl implements UserService {
         if (updatedProfile.getDob() != null)
             profile.setDob(updatedProfile.getDob());
 
+        if (updatedProfile.getProfilePhoto() != null) {
+            profile.setProfilePhoto(updatedProfile.getProfilePhoto());
+        }
+
         // Email is explicitly NOT updated here to keep it read-only
 
         return java.util.Objects.requireNonNull(userProfileRepository.save(profile));
