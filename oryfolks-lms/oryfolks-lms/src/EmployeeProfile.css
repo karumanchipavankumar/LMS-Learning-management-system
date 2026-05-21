@@ -375,3 +375,37 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
 }
+
+/* Zoomed Photo Modal & Success Modal Styles */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.zoomed-photo-modal-overlay,
+.success-modal-overlay {
+    animation: fadeIn 0.2s ease-out;
+}
+
+.zoomed-photo-modal-content,
+.success-modal-content {
+    animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.profile-photo-action-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.profile-photo-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.profile-photo-action-btn:active {
+    transform: translateY(0);
+}

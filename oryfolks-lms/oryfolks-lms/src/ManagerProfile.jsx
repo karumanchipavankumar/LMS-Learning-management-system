@@ -21,6 +21,10 @@ const ManagerProfile = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('profile');
 
+    const [zoomedPhoto, setZoomedPhoto] = useState(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+
     const [passwords, setPasswords] = useState({
         currentPassword: '',
         newPassword: '',
@@ -109,7 +113,8 @@ const ManagerProfile = () => {
             if (fetchProfile) {
                 await fetchProfile();
             }
-            alert("Profile updated successfully!");
+            setSuccessMessage("Profile updated successfully!");
+            setShowSuccessModal(true);
         } catch (error) {
             console.error("Error updating profile:", error);
             if (error.response?.data?.errors) {
@@ -253,15 +258,55 @@ const ManagerProfile = () => {
                     {activeTab === 'profile' && (
                         <>
 
-                    <div className="profile-avatar-upload-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
-                        <label className="profile-cam-avatar" style={{ cursor: isEditing ? 'pointer' : 'default', overflow: 'hidden', padding: isValidImage(profile.profilePhoto) ? 0 : undefined, background: isValidImage(profile.profilePhoto) ? undefined : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', color: 'white', border: isValidImage(profile.profilePhoto) ? undefined : 'none' }}>
+                    <div className="profile-avatar-upload-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '1.5rem', padding: '2.5rem 2rem 1rem' }}>
+                        <div 
+                            className="profile-cam-avatar" 
+                            style={{ 
+                                cursor: isValidImage(profile.profilePhoto) ? 'zoom-in' : 'default', 
+                                overflow: 'hidden', 
+                                padding: isValidImage(profile.profilePhoto) ? 0 : undefined, 
+                                background: isValidImage(profile.profilePhoto) ? undefined : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', 
+                                color: 'white', 
+                                border: isValidImage(profile.profilePhoto) ? '2px solid #e2e8f0' : '2px dashed #cbd5e1' 
+                            }}
+                            onClick={() => {
+                                if (isValidImage(profile.profilePhoto)) {
+                                    setZoomedPhoto(profile.profilePhoto);
+                                }
+                            }}
+                            title={isValidImage(profile.profilePhoto) ? "Click to view large photo" : ""}
+                        >
                             {isValidImage(profile.profilePhoto) ? (
                                 <img src={profile.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             ) : (
                                 <span style={{ fontSize: '32px', fontWeight: '700' }}>{getInitials()}</span>
                             )}
-                            {isEditing && (
+                        </div>
+                        {isEditing && (
+                            <div className="profile-photo-edit-actions" style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <label 
+                                    htmlFor="profile-photo-input" 
+                                    className="profile-photo-action-btn upload" 
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '8px 16px',
+                                        backgroundColor: '#4f46e5',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        border: 'none',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {isValidImage(profile.profilePhoto) ? 'Change Photo' : 'Upload Photo'}
+                                </label>
                                 <input
+                                    id="profile-photo-input"
                                     type="file"
                                     accept="image/*"
                                     style={{ display: 'none' }}
@@ -276,28 +321,29 @@ const ManagerProfile = () => {
                                         }
                                     }}
                                 />
-                            )}
-                        </label>
-                        {isEditing && isValidImage(profile.profilePhoto) && (
-                            <button
-                                type="button"
-                                onClick={() => setProfile(prev => ({ ...prev, profilePhoto: '' }))}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#ef4444',
-                                    fontSize: '13px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    transition: 'background-color 0.2s'
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                            >
-                                Remove Photo
-                            </button>
+                                <button
+                                    type="button"
+                                    className="profile-photo-action-btn remove"
+                                    onClick={() => setProfile(prev => ({ ...prev, profilePhoto: '' }))}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '8px 16px',
+                                        backgroundColor: '#ef4444',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        border: 'none',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    Remove Photo
+                                </button>
+                            </div>
                         )}
                     </div>
 
@@ -413,6 +459,187 @@ const ManagerProfile = () => {
                     )}
                 </main>
             </div>
+
+            {/* Zoomed Photo Modal */}
+            {zoomedPhoto && (
+                <div 
+                    className="zoomed-photo-modal-overlay" 
+                    onClick={() => setZoomedPhoto(null)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999
+                    }}
+                >
+                    <div 
+                        className="zoomed-photo-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position: 'relative',
+                            maxWidth: '90%',
+                            maxHeight: '90%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <button
+                            className="zoomed-photo-close-btn"
+                            onClick={() => setZoomedPhoto(null)}
+                            style={{
+                                position: 'absolute',
+                                top: '-45px',
+                                right: '0px',
+                                background: 'rgba(255, 255, 255, 0.2)',
+                                border: 'none',
+                                color: 'white',
+                                width: '36px',
+                                height: '36px',
+                                borderRadius: '50%',
+                                fontSize: '20px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)';
+                                e.currentTarget.style.transform = 'scale(1.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                        >
+                            &times;
+                        </button>
+                        <img 
+                            src={zoomedPhoto} 
+                            alt="Zoomed Profile" 
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '80vh',
+                                borderRadius: '12px',
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                                border: '4px solid white',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Success Popup Modal */}
+            {showSuccessModal && (
+                <div 
+                    className="success-modal-overlay" 
+                    onClick={() => setShowSuccessModal(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(15, 23, 42, 0.7)',
+                        backdropFilter: 'blur(6px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999
+                    }}
+                >
+                    <div 
+                        className="success-modal-content"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            backgroundColor: 'white',
+                            padding: '2.5rem',
+                            borderRadius: '16px',
+                            width: '90%',
+                            maxWidth: '400px',
+                            textAlign: 'center',
+                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                            border: '1px solid #e2e8f0',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '16px'
+                        }}
+                    >
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            backgroundColor: '#ecfdf5',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#10b981',
+                            boxShadow: '0 4px 10px rgba(16, 185, 129, 0.1)'
+                        }}>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        
+                        <h3 style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#0f172a',
+                            margin: 0
+                        }}>
+                            Success!
+                        </h3>
+                        
+                        <p style={{
+                            fontSize: '14px',
+                            color: '#64748b',
+                            margin: '0 0 8px 0',
+                            lineHeight: '1.5'
+                        }}>
+                            {successMessage}
+                        </p>
+                        
+                        <button 
+                            onClick={() => setShowSuccessModal(false)}
+                            style={{
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '10px 24px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                width: '100%',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 6px rgba(16, 185, 129, 0.2)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#059669';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#10b981';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
