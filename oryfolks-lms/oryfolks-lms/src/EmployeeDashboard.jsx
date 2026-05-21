@@ -13,6 +13,7 @@ const EmployeeDashboard = () => {
     const [username, setUsername] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState(''); // New state for last name
+    const [profilePhoto, setProfilePhoto] = useState(null); // New state for profile photo
     const [assignedCourses, setAssignedCourses] = useState([]);
     const [allCourses, setAllCourses] = useState([]);
     const [enrollmentHistory, setEnrollmentHistory] = useState([]);
@@ -63,6 +64,7 @@ const EmployeeDashboard = () => {
             if (profileRes.data) {
                 setFirstName(profileRes.data.firstName || username);
                 setLastName(profileRes.data.lastName || '');
+                setProfilePhoto(profileRes.data.profilePhoto || null);
             }
 
         } catch (error) {
@@ -355,14 +357,15 @@ const EmployeeDashboard = () => {
     };
 
 
+    const isValidImage = (photo) => {
+        if (!photo) return false;
+        const clean = photo.trim();
+        return clean.startsWith('data:image/') || clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/') || clean.startsWith('blob:');
+    };
+
     const getInitials = () => {
-        if (firstName && lastName) {
-            return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-        }
-        if (firstName) {
-            return firstName.substring(0, 2).toUpperCase();
-        }
-        return (username || 'U').substring(0, 2).toUpperCase();
+        const firstChar = firstName ? firstName.charAt(0) : '';
+        return firstChar.toUpperCase() || (username || 'U').charAt(0).toUpperCase();
     };
 
     const displayedCourses = activeTab === 'assigned'
@@ -425,8 +428,13 @@ const EmployeeDashboard = () => {
                     <button
                         className="employee-profile-button"
                         onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                        style={{ padding: isValidImage(profilePhoto) ? 0 : undefined, overflow: 'hidden' }}
                     >
-                        {getInitials()}
+                        {isValidImage(profilePhoto) ? (
+                            <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            getInitials()
+                        )}
                     </button>
 
                     <div

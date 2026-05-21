@@ -23,6 +23,9 @@ public class ManagerController {
     @Autowired
     private com.oryfolks.lms_backend.service.CourseService courseService;
 
+    @Autowired
+    private com.oryfolks.lms_backend.service.UserService userService;
+
     @GetMapping("/unread-counts")
     public ResponseEntity<?> getUnreadCounts(Authentication auth) {
         User manager = userRepository.findByUsername(auth.getName())
@@ -32,19 +35,12 @@ public class ManagerController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication auth) {
-        User manager = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
-        
-        java.util.Map<String, Object> profile = new java.util.HashMap<>();
-        profile.put("id", manager.getId());
-        profile.put("username", manager.getUsername());
-        profile.put("role", manager.getRole());
-        if (manager.getProfile() != null) {
-            profile.put("firstName", manager.getProfile().getFirstName());
-            profile.put("lastName", manager.getProfile().getLastName());
-            profile.put("email", manager.getProfile().getEmail());
-        }
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(userService.getProfile(auth.getName()));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(Authentication auth, @RequestBody com.oryfolks.lms_backend.entity.UserProfile updatedProfile) {
+        return ResponseEntity.ok(userService.updateProfile(auth.getName(), updatedProfile));
     }
 
     @GetMapping("/my-team")

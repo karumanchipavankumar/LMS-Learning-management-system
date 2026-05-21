@@ -140,7 +140,7 @@ const DataProvider = ({ children }) => {
     return (
         <DataContext.Provider value={{ 
             teamMembers, courses, assignCourseToMembers, fetchEmployees, 
-            managerProfile, unreadCounts, fetchUnreadCounts 
+            managerProfile, fetchProfile, unreadCounts, fetchUnreadCounts 
         }}>
             {children}
         </DataContext.Provider>
@@ -201,6 +201,17 @@ const Header = () => {
         navigate('/');
     };
 
+    const isValidImage = (photo) => {
+        if (!photo) return false;
+        const clean = photo.trim();
+        return clean.startsWith('data:image/') || clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/') || clean.startsWith('blob:');
+    };
+
+    const getInitials = () => {
+        const first = managerProfile?.firstName || '';
+        return first.charAt(0).toUpperCase() || 'M';
+    };
+
     const firstName = managerProfile?.firstName || "Manager";
 
     return (
@@ -210,8 +221,40 @@ const Header = () => {
             </div>
             <div className="header-actions">
                 <NotificationBell dashboardType="manager" />
-                <button className="icon-btn" onClick={() => navigate('/manager/profile')} title="Profile">
-                    <User size={24} />
+                <button 
+                    onClick={() => navigate('/manager/profile')} 
+                    title="Profile" 
+                    style={{ 
+                        padding: isValidImage(managerProfile?.profilePhoto) ? 0 : undefined, 
+                        overflow: 'hidden', 
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#f97316',
+                        color: 'white',
+                        fontWeight: '700',
+                        fontSize: '14px',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ea580c';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f97316';
+                        e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                >
+                    {isValidImage(managerProfile?.profilePhoto) ? (
+                        <img src={managerProfile.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                        getInitials()
+                    )}
                 </button>
                 <button className="icon-btn" onClick={handleLogout} title="Logout">
                     <LogOut size={24} />
