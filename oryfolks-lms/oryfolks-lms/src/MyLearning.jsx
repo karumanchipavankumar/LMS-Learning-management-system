@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { ArrowLeft, Clock, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import './EmployeeDashboard.css'; // Reusing dashboard styles
 import logo from './assets/logo.png';
+import Footer from './Footer';
 
 const MyLearning = () => {
     const navigate = useNavigate();
@@ -377,11 +378,7 @@ const MyLearning = () => {
                 )}
             </div>
 
-            <footer className="employee-footer">
-                <div className="footer-bottom">
-                    <p>© 2026 Oryfolks LMS. Inspired by the world's best learning platforms.</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { ArrowLeft } from 'lucide-react';
 import './EmployeeProfile.css';
 import NotificationsPage from './NotificationsPage';
+import Footer from './Footer';
 
 const EmployeeProfile = () => {
     const navigate = useNavigate();
@@ -656,6 +657,7 @@ const EmployeeProfile = () => {
                     </div>
                 </div>
             )}
+            <Footer />
         </div>
     );
 };

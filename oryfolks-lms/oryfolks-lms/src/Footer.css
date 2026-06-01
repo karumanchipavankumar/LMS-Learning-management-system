@@ -1,0 +1,271 @@
+/* Professional Footer Styles */
+.oryfolks-professional-footer {
+    background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+    color: #e2e8f0;
+    font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 5rem 2rem 2rem 2rem;
+    margin-top: 6rem;
+    position: relative;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+}
+
+/* Subtle glowing accent line on top of footer */
+.oryfolks-professional-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f97316, transparent);
+    opacity: 0.8;
+}
+
+.footer-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 2fr;
+    gap: 4rem;
+    padding-bottom: 4rem;
+}
+
+/* Brand Column */
+.footer-brand-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.footer-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.footer-logo-image {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.footer-logo-container:hover .footer-logo-image {
+    transform: rotate(-10deg) scale(1.05);
+}
+
+.footer-logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+.footer-logo-text .highlight {
+    color: #f97316;
+}
+
+.footer-brand-description {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Social icons with premium hover states */
+.footer-social-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.social-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.social-icon-btn:hover {
+    background-color: #f97316;
+    color: #ffffff;
+    border-color: #f97316;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* Links Columns */
+.footer-links-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.footer-links-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.footer-column-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    margin: 0;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-column-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background-color: #f97316;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.footer-link-action {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: fit-content;
+}
+
+.footer-link-action:hover {
+    color: #f97316;
+    transform: translateX(4px);
+}
+
+.footer-link-action.external {
+    display: inline-flex;
+}
+
+.inline-icon {
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.footer-link-action:hover .inline-icon {
+    transform: translate(2px, -2px);
+    opacity: 1;
+}
+
+/* Contact Info list */
+.address-list {
+    gap: 1rem;
+}
+
+.footer-text-info {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+.footer-text-info strong {
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+/* Bottom Bar */
+.footer-bottom-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 2rem;
+    margin-top: 2rem;
+}
+
+.footer-bottom-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.copyright-text {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.footer-bottom-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.meta-link {
+    font-size: 0.875rem;
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.meta-link:hover {
+    color: #f97316;
+}
+
+.separator {
+    color: #334155;
+    font-size: 0.75rem;
+}
+
+/* Responsive Adaptability */
+@media (max-width: 1024px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .oryfolks-professional-footer {
+        padding: 4rem 1.5rem 2rem 1.5rem;
+        margin-top: 4rem;
+    }
+    
+    .footer-links-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .footer-bottom-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}

@@ -6,6 +6,7 @@ import { Search, CheckCircle, Clock } from 'lucide-react';
 import './EmployeeDashboard.css';
 import logo from './assets/logo.png';
 import NotificationBell from './NotificationBell';
+import Footer from './Footer';
 
 const EmployeeDashboard = () => {
     const navigate = useNavigate();
@@ -612,36 +613,7 @@ const EmployeeDashboard = () => {
             </div>
 
             {/* Premium Footer Section */}
-            <footer className="employee-footer">
-                <div className="employee-footer-content">
-                    <div className="footer-brand-section">
-                        <div className="footer-logo">
-                            <img src={logo} alt="Oryfolks" />
-                        </div>
-
-                        <p className="footer-tagline">
-                            Empowering your growth through continuous learning. Join thousands of professionals mastering new skills every day.
-                        </p>
-                    </div>
-
-                    <div className="footer-links-grid">
-                        <div className="footer-links-column">
-                            <h3>Learning Resources</h3>
-                            <button className="footer-link-btn">Help Center</button>
-                            <button className="footer-link-btn">Contact Support</button>
-                        </div>
-                        <div className="footer-links-column">
-                            <h3>Company</h3>
-                            <button className="footer-link-btn">About Us</button>
-                            <button className="footer-link-btn">Terms of Service</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="footer-bottom">
-                    <p>© 2026 Oryfolks LMS. Inspired by the world's best learning platforms.</p>
-                </div>
-            </footer>
+            <Footer />
 
             {/* Enrollment Modal */}
             <EnrollmentModal />
