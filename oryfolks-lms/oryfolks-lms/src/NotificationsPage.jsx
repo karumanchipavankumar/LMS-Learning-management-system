@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from './apiConfig';
 import './Notifications.css';
 
 const NotificationsPage = ({ dashboardType = 'employee' }) => {
@@ -48,7 +49,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/notifications/all?page=${page}&size=10`, {
+            const response = await axios.get(`${API_BASE_URL}/notifications/all?page=${page}&size=10`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(response.data.content);
@@ -68,7 +69,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
         if (e) e.stopPropagation();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8080/notifications/${id}/read`, {}, {
+            await axios.put(`${API_BASE_URL}/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
@@ -86,7 +87,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
     const handleMarkAllAsRead = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8080/notifications/read-all`, {}, {
+            await axios.put(`${API_BASE_URL}/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.map(n => ({ ...n, read: true })));
@@ -100,7 +101,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
         if (!window.confirm("Are you sure you want to delete this notification?")) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8080/notifications/${id}`, {
+            await axios.delete(`${API_BASE_URL}/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.filter(n => n.id !== id));
@@ -117,7 +118,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
         try {
             const token = localStorage.getItem('token');
             await Promise.all(selectedIds.map(id => 
-                axios.delete(`http://localhost:8080/notifications/${id}`, {
+                axios.delete(`${API_BASE_URL}/notifications/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ));

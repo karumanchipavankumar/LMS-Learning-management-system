@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import './CourseManagement.css';
 
@@ -18,7 +19,7 @@ const CourseManagement = ({ onBack }) => {
     const fetchCourses = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:8080/admin/courses/all",
+                `${API_BASE_URL}/admin/courses/all`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -35,7 +36,7 @@ const CourseManagement = ({ onBack }) => {
     const handleDelete = async (courseId, courseTitle) => {
         if (window.confirm(`Are you sure you want to delete the course "${courseTitle}"? This will also remove all assignments and enrollments.`)) {
             try {
-                await axios.delete(`http://localhost:8080/admin/courses/${courseId}`, {
+                await axios.delete(`${API_BASE_URL}/admin/courses/${courseId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

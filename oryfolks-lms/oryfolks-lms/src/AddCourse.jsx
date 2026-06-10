@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import API_BASE_URL from './apiConfig';
 import './AddCourse.css';
 
 const AddCourse = () => {
@@ -105,7 +106,7 @@ const AddCourse = () => {
             multipartData.append('thumbnail', formData.thumbnail);
             multipartData.append('video', formData.video);
 
-            const response = await fetch('http://localhost:8080/admin/courses', {
+            const response = await fetch(`${API_BASE_URL}/admin/courses`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
+import API_BASE_URL from './apiConfig';
 import './UserManagement.css';
 import './CourseManagement.css'; // Import shared styles for pill search
 
@@ -16,7 +17,7 @@ const UserManagement = ({ onBack }) => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:8080/admin/users",
+                `${API_BASE_URL}/admin/users`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -39,13 +40,14 @@ const UserManagement = ({ onBack }) => {
         if (window.confirm(`Are you sure you want to delete "${userName}"? This will permanently remove all their associated data.`)) {
             try {
                 await axios.delete(
-                    `http://localhost:8080/admin/users/${id}`,
+                    `${API_BASE_URL}/admin/users/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     }
                 );
+
 
                 fetchUsers(); // refresh list
             } catch (error) {

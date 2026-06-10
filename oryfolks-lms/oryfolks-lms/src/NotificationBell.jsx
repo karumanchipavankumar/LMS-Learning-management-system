@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from './apiConfig';
 import './Notifications.css';
 
 const NotificationBell = ({ dashboardType = 'employee' }) => {
@@ -13,7 +14,7 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
     const fetchUnreadCount = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/notifications/unread-count', {
+            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUnreadCount(response.data.count);
@@ -25,7 +26,7 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
     const fetchLatestNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8080/notifications', {
+            const response = await axios.get(`${API_BASE_URL}/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(response.data);
@@ -62,7 +63,7 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
         if (e) e.stopPropagation();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8080/notifications/${id}/read`, {}, {
+            await axios.put(`${API_BASE_URL}/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
@@ -76,7 +77,7 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
         if (e) e.stopPropagation();
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:8080/notifications/read-all`, {}, {
+            await axios.put(`${API_BASE_URL}/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.map(n => ({ ...n, read: true })));
@@ -90,7 +91,7 @@ const NotificationBell = ({ dashboardType = 'employee' }) => {
         if (e) e.stopPropagation();
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8080/notifications/${id}`, {
+            await axios.delete(`${API_BASE_URL}/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(notifications.filter(n => n.id !== id));

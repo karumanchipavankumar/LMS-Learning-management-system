@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Search } from 'lucide-react';
+import API_BASE_URL from './apiConfig';
 import './CourseManagement.css'; // Reusing styles for consistency
 
 const RecentAssignments = () => {
@@ -23,9 +24,10 @@ const RecentAssignments = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                "http://localhost:8080/admin/dashboard/recent-assignments",
+                `${API_BASE_URL}/admin/dashboard/recent-assignments`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
             setAssignments(response.data);
             setLoading(false);
         } catch (error) {

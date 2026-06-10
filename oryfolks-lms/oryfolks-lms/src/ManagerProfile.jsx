@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import './EmployeeProfile.css';
 import { useData } from './ManagerDashboard';
 
@@ -43,7 +44,7 @@ const ManagerProfile = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:8080/manager/profile', {
+                const response = await axios.get(`${API_BASE_URL}/manager/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProfile(response.data);
@@ -105,7 +106,7 @@ const ManagerProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.put('http://localhost:8080/manager/profile', profile, {
+            await axios.put(`${API_BASE_URL}/manager/profile`, profile, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOriginalProfile(profile);
@@ -142,7 +143,7 @@ const ManagerProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const response = await axios.post('http://localhost:8080/manager/change-password', {
+            const response = await axios.post(`${API_BASE_URL}/manager/change-password`, {
                 currentPassword: passwords.currentPassword,
                 newPassword: passwords.newPassword
             }, {

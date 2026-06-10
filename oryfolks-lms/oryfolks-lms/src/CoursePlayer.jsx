@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import axios from 'axios'; // Import axios
+import API_BASE_URL from './apiConfig';
 import './CoursePlayer.css';
 import logo from './assets/logo.png';
 
@@ -44,7 +45,7 @@ const CoursePlayer = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/employee/courses/${courseId}`, {
+                const response = await axios.get(`${API_BASE_URL}/employee/courses/${courseId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setCourse(response.data);
@@ -138,7 +139,7 @@ const CoursePlayer = () => {
         }
 
         try {
-            await axios.post(`http://localhost:8080/employee/courses/${courseId}/progress`, null, {
+            await axios.post(`${API_BASE_URL}/employee/courses/${courseId}/progress`, null, {
                 params: {
                     progress: newProgress,
                     lastWatchedTimestamp: currentTime
@@ -171,7 +172,7 @@ const CoursePlayer = () => {
         markingCompletedRef.current.add(contentId);
 
         try {
-            await axios.post(`http://localhost:8080/employee/courses/content/${contentId}/complete`, null, {
+            await axios.post(`${API_BASE_URL}/employee/courses/content/${contentId}/complete`, null, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // Update local state
@@ -262,7 +263,7 @@ const CoursePlayer = () => {
 
             const response = await axios.post(
 
-                `http://localhost:8080/employee/course-feedback/submit/${userId}`,
+                `${API_BASE_URL}/employee/course-feedback/submit/${userId}`,
 
                 {
                     courseId: course.id,
@@ -351,7 +352,7 @@ const CoursePlayer = () => {
 
             const response = await axios.get(
 
-                `http://localhost:8080/employee/course-feedback/reviews/${course.id}`,
+                `${API_BASE_URL}/employee/course-feedback/reviews/${course.id}`,
 
                 {
                     headers: {
@@ -410,7 +411,7 @@ const CoursePlayer = () => {
             // already submitted rating
             const response = await axios.get(
 
-                `http://localhost:8080/employee/course-feedback/has-rated/${course.id}/${userId}`,
+                `${API_BASE_URL}/employee/course-feedback/has-rated/${course.id}/${userId}`,
 
                 {
                     headers: {

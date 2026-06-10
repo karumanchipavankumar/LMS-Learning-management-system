@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import API_BASE_URL from './apiConfig';
 import { Search, CheckCircle, Clock } from 'lucide-react';
 import './EmployeeDashboard.css';
 import logo from './assets/logo.png';
@@ -43,16 +44,16 @@ const EmployeeDashboard = () => {
         try {
             // Fetch profile and courses in parallel
             const [myCoursesRes, allCoursesRes, profileRes, historyRes] = await Promise.all([
-                axios.get('http://localhost:8080/employee/courses/my', {
+                axios.get(`${API_BASE_URL}/employee/courses/my`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
-                axios.get('http://localhost:8080/employee/courses/all', {
+                axios.get(`${API_BASE_URL}/employee/courses/all`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
-                axios.get('http://localhost:8080/employee/profile', {
+                axios.get(`${API_BASE_URL}/employee/profile`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
-                axios.get('http://localhost:8080/employee/enrollments/history', {
+                axios.get(`${API_BASE_URL}/employee/enrollments/history`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
             ]);
@@ -117,7 +118,7 @@ const EmployeeDashboard = () => {
         if (!selectedCourse) return;
         setEnrollmentStatus('loading');
         try {
-            await axios.post(`http://localhost:8080/employee/enroll/${selectedCourse.id}`, {}, {
+            await axios.post(`${API_BASE_URL}/employee/enroll/${selectedCourse.id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEnrollmentStatus('success');

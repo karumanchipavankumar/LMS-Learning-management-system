@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import { ArrowLeft } from 'lucide-react';
 import './AddUser.css';
 
@@ -98,7 +99,7 @@ const AddUser = () => {
             const token = localStorage.getItem("token");
 
             const response = await axios.post(
-                "http://localhost:8080/admin/add-user",
+                `${API_BASE_URL}/admin/add-user`,
                 {
                     username: formData.username,
                     password: formData.password,

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
+import API_BASE_URL from './apiConfig';
 import './CourseManagement.css'; // Reusing styles
 
 const PendingCourses = () => {
@@ -22,7 +23,7 @@ const PendingCourses = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                "http://localhost:8080/admin/pending-courses",
+                `${API_BASE_URL}/admin/pending-courses`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setAssignments(response.data);
@@ -39,9 +40,10 @@ const PendingCourses = () => {
         try {
             const token = localStorage.getItem("token");
             await axios.delete(
-                `http://localhost:8080/admin/courses/${id}`,
+                `${API_BASE_URL}/admin/courses/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
             fetchAssignments(); // refresh list
         } catch (error) {
             console.error("Delete failed", error);

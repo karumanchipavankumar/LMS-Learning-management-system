@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import API_BASE_URL from './apiConfig';
 import { ArrowLeft } from 'lucide-react';
 import './EmployeeProfile.css';
 import NotificationsPage from './NotificationsPage';
@@ -54,7 +55,7 @@ const EmployeeProfile = () => {
             }
 
             try {
-                const response = await axios.get('http://localhost:8080/employee/profile', {
+                const response = await axios.get(`${API_BASE_URL}/employee/profile`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProfile(response.data);
@@ -116,7 +117,7 @@ const EmployeeProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            await axios.put('http://localhost:8080/employee/profile', profile, {
+            await axios.put(`${API_BASE_URL}/employee/profile`, profile, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOriginalProfile(profile);
@@ -150,7 +151,7 @@ const EmployeeProfile = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const response = await axios.post('http://localhost:8080/employee/change-password', {
+            const response = await axios.post(`${API_BASE_URL}/employee/change-password`, {
                 currentPassword: passwords.currentPassword,
                 newPassword: passwords.newPassword
             }, {

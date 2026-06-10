@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import { LayoutDashboard, Users, BookOpen, LogOut, CheckCircle, Clock, XCircle, FileText, Bell, Settings, Activity } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import './AdminDashboard.css';
@@ -26,7 +27,7 @@ const AdminDashboard = ({ activeTabDefault }) => {
     const fetchUnreadNotificationsCount = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:8080/notifications/unread-count", {
+            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUnreadNotificationsCount(response.data.count);
@@ -65,7 +66,7 @@ const AdminDashboard = ({ activeTabDefault }) => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                "http://localhost:8080/admin/dashboard/summary",
+                `${API_BASE_URL}/admin/dashboard/summary`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 

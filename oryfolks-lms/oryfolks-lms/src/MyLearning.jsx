@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import API_BASE_URL from './apiConfig';
 import { ArrowLeft, Clock, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import './EmployeeDashboard.css'; // Reusing dashboard styles
 import logo from './assets/logo.png';
@@ -36,10 +37,10 @@ const MyLearning = () => {
         setLoading(true);
         try {
             const [myCoursesRes, historyRes] = await Promise.all([
-                axios.get('http://localhost:8080/employee/courses/my', {
+                axios.get(`${API_BASE_URL}/employee/courses/my`, {
                     headers: { Authorization: `Bearer ${token}` },
                 }),
-                axios.get('http://localhost:8080/employee/enrollments/history', {
+                axios.get(`${API_BASE_URL}/employee/enrollments/history`, {
                     headers: { Authorization: `Bearer ${token}` },
                 })
             ]);

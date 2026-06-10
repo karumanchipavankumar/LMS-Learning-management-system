@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import './ManagerDashboard.css';
 import './CourseManagement.css'; // Import shared styles for pill search
 import logo from './assets/logo.png';
@@ -29,7 +30,7 @@ const DataProvider = ({ children }) => {
     const fetchUnreadCounts = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:8080/manager/unread-counts", {
+            const response = await axios.get(`${API_BASE_URL}/manager/unread-counts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUnreadCounts(response.data);
@@ -41,7 +42,7 @@ const DataProvider = ({ children }) => {
     const fetchEmployees = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:8080/manager/my-team", {
+            const response = await axios.get(`${API_BASE_URL}/manager/my-team`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTeamMembers(response.data);
@@ -55,7 +56,7 @@ const DataProvider = ({ children }) => {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:8080/manager/profile", {
+            const response = await axios.get(`${API_BASE_URL}/manager/profile`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setManagerProfile(response.data);
@@ -85,7 +86,7 @@ const DataProvider = ({ children }) => {
             try {
                 const token = localStorage.getItem("token");
                 // console.log("Token:", token);
-                const response = await fetch("http://localhost:8080/manager/courses", {
+                const response = await fetch(`${API_BASE_URL}/manager/courses`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -120,7 +121,7 @@ const DataProvider = ({ children }) => {
                 deadline: customDeadline
             };
 
-            const response = await axios.post("http://localhost:8080/manager/assign-course", requestBody, {
+            const response = await axios.post(`${API_BASE_URL}/manager/assign-course`, requestBody, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
@@ -827,7 +828,7 @@ const MyTeam = () => {
     const handleMemberClick = async (memberId) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:8080/manager/team/${memberId}/mark-viewed`, {}, {
+            await axios.put(`${API_BASE_URL}/manager/team/${memberId}/mark-viewed`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchEmployees();
@@ -1015,7 +1016,7 @@ const TeamMemberDetails = () => {
 
         try {
             const token = localStorage.getItem("token");
-            await axios.post("http://localhost:8080/manager/send-reminder", {
+            await axios.post(`${API_BASE_URL}/manager/send-reminder`, {
                 courseId: course.courseId,
                 employeeIds: [memberDetails.id]
             }, {
@@ -1319,7 +1320,7 @@ const CourseAssignment = () => {
 
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:8080/manager/assign-course", {
+            const response = await fetch(`${API_BASE_URL}/manager/assign-course`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
@@ -1345,7 +1346,7 @@ const CourseAssignment = () => {
         if (!window.confirm("Are you sure you want to unassign this course?")) return;
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:8080/manager/unassign-course", {
+            const response = await fetch(`${API_BASE_URL}/manager/unassign-course`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({
@@ -1563,14 +1564,14 @@ const CourseEnrollments = () => {
     const fetchEnrollments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/manager/enrollments?status=${filterStatus}`, {
+            const response = await axios.get(`${API_BASE_URL}/manager/enrollments?status=${filterStatus}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEnrollments(response.data);
             
             // Mark all as viewed when viewing the page
             if (response.data.some(e => !e.viewedByManager && e.status === 'PENDING')) {
-                await axios.put("http://localhost:8080/manager/enrollments/mark-all-viewed", {}, {
+                await axios.put(`${API_BASE_URL}/manager/enrollments/mark-all-viewed`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 fetchUnreadCounts();
@@ -1589,7 +1590,7 @@ const CourseEnrollments = () => {
     const handleAction = async (id, action) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/manager/enrollments/${id}/${action}`, {
+            const response = await fetch(`${API_BASE_URL}/manager/enrollments/${id}/${action}`, {
                 method: 'PUT',
                 headers: { Authorization: `Bearer ${token}` }
             });

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from './apiConfig';
 import { ArrowLeft } from 'lucide-react';
 import './CourseManagement.css'; // Reusing CourseManagement styles for table consistency
 
@@ -21,7 +22,7 @@ const AllAssignedCourses = () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-                "http://localhost:8080/admin/assigned-courses",
+                `${API_BASE_URL}/admin/assigned-courses`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setAssignments(response.data);
