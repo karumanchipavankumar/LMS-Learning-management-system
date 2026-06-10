@@ -42,10 +42,10 @@ public class SecurityConfig {
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/manager/**").hasAuthority("MANAGER")
-                        .requestMatchers("/employee/**").hasAuthority("EMPLOYEE")
+                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/admin/**", "/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/manager/**", "/api/manager/**").hasAuthority("MANAGER")
+                        .requestMatchers("/employee/**", "/api/employee/**").hasAuthority("EMPLOYEE")
                         .anyRequest().authenticated())
 
                 // Stateless session
@@ -57,16 +57,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS Configuration (frontend 5173 and 5174 → backend 8080)
+    // CORS Configuration — allows localhost (dev) and production frontend URL
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
+        // Fixed: removed duplicate setAllowedOrigins that was overwriting the production frontendUrl
         config.setAllowedOrigins(List.of(
             "http://localhost:5173",
+            "http://localhost:5174",
             frontendUrl
         ));
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
