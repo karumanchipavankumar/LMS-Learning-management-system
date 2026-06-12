@@ -22,6 +22,10 @@ import com.oryfolks.lms_backend.config.JwtUtil;
 import com.oryfolks.lms_backend.event.NotificationEvent;
 import com.oryfolks.lms_backend.entity.NotificationType;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -46,6 +50,46 @@ public class UserServiceImpl implements UserService {
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
+
+    private String getFrontendUrl() {
+        try {
+            org.springframework.web.context.request.RequestAttributes attribs = RequestContextHolder.getRequestAttributes();
+            if (attribs instanceof ServletRequestAttributes) {
+                HttpServletRequest request = ((ServletRequestAttributes) attribs).getRequest();
+                
+                String origin = request.getHeader("Origin");
+                if (isValidOrigin(origin)) {
+                    return origin;
+                }
+                
+                String referer = request.getHeader("Referer");
+                if (referer != null && !referer.isEmpty()) {
+                    URI uri = new URI(referer);
+                    String scheme = uri.getScheme();
+                    String authority = uri.getAuthority();
+                    if (scheme != null && authority != null) {
+                        String refererOrigin = scheme + "://" + authority;
+                        if (isValidOrigin(refererOrigin)) {
+                            return refererOrigin;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to determine frontend URL from request context: " + e.getMessage());
+        }
+        return frontendUrl;
+    }
+
+    private boolean isValidOrigin(String origin) {
+        if (origin == null || origin.isEmpty()) {
+            return false;
+        }
+        String cleanedFrontendUrl = frontendUrl != null ? frontendUrl.replaceAll("/+$", "") : "";
+        return origin.equals("http://localhost:5173") || 
+               origin.equals("http://localhost:5174") || 
+               origin.equals(cleanedFrontendUrl);
+    }
 
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
@@ -151,7 +195,7 @@ public class UserServiceImpl implements UserService {
             tokenRepository.deleteByUser(savedUser);
             PasswordResetToken resetToken = new PasswordResetToken(token, savedUser, LocalDateTime.now().plusHours(24));
             tokenRepository.save(resetToken);
-            String resetLink = frontendUrl + "/reset-password?token=" + token;
+            String resetLink = getFrontendUrl() + "/reset-password?token=" + token;
 
             emailService.sendWelcomeEmail(form.getEmail(), form.getFirstName(), form.getUsername(), form.getPassword(),
                     resetLink);
@@ -231,7 +275,7 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(resetToken);
 
-        String resetLink = frontendUrl + "/reset-password?token=" + token;
+        String resetLink = getFrontendUrl() + "/reset-password?token=" + token;
         emailService.sendPasswordResetEmail(normalizedEmail, resetLink);
     }
 
