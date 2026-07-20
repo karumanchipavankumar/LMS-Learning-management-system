@@ -1,4 +1,4 @@
-$adminUser = "admin@lms.com"
+$adminUser = "k.thanmai@oryfolks.com"
 $adminPass = "admin123"
 $baseUrl = "http://localhost:8080"
 
