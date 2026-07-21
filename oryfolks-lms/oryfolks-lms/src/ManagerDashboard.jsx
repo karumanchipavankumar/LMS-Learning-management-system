@@ -164,7 +164,11 @@ const Sidebar = () => {
 
     return (
         <div className="sidebar">
-            <div className="sidebar-header">
+            <div 
+                className="sidebar-header" 
+                onClick={() => navigate('/manager')} 
+                style={{ cursor: 'pointer' }}
+            >
                 <img src={logo} alt="ORYFOLKS" style={{ height: '40px', width: 'auto' }} />
             </div>
 

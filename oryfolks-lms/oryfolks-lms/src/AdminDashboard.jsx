@@ -37,9 +37,7 @@ const AdminDashboard = ({ activeTabDefault }) => {
     };
 
     useEffect(() => {
-        if (activeTabDefault) {
-            setActiveTab(activeTabDefault);
-        }
+        setActiveTab(activeTabDefault || 'Dashboard');
     }, [activeTabDefault]);
 
     useEffect(() => {
@@ -98,23 +96,36 @@ const AdminDashboard = ({ activeTabDefault }) => {
     const onPieClick = (data, index) => {
         if (!data) return;
         const type = data.name || (data.payload && data.payload.name);
-        if (type === "Total Members") setActiveTab('User Management');
-        if (type === "Total Courses") setActiveTab('Course Management');
+        if (type === "Total Members") {
+            setActiveTab('User Management');
+            navigate('/admin/users');
+        }
+        if (type === "Total Courses") {
+            setActiveTab('Course Management');
+            navigate('/admin/courses');
+        }
     };
 
     const menuItems = [
-        { name: 'Dashboard', icon: LayoutDashboard },
-        { name: 'User Management', icon: Users },
-        { name: 'Course Management', icon: BookOpen },
-        { name: 'Notifications', icon: Bell },
-        { name: 'Settings', icon: Settings }
+        { name: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
+        { name: 'User Management', icon: Users, path: '/admin/users' },
+        { name: 'Course Management', icon: BookOpen, path: '/admin/courses' },
+        { name: 'Notifications', icon: Bell, path: '/admin/notifications' },
+        { name: 'Settings', icon: Settings, path: '/admin/settings' }
     ];
 
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
             <div className="sidebar">
-                <div className="sidebar-header">
+                <div 
+                    className="sidebar-header" 
+                    onClick={() => {
+                        setActiveTab('Dashboard');
+                        navigate('/admin');
+                    }} 
+                    style={{ cursor: 'pointer' }}
+                >
                     <img src={logo} alt="ORYFOLKS" style={{ height: '40px', width: 'auto' }} />
                 </div>
                 <nav className="sidebar-nav">
@@ -124,11 +135,7 @@ const AdminDashboard = ({ activeTabDefault }) => {
                             className={`nav-item ${activeTab === item.name ? 'active' : ''}`}
                             onClick={() => {
                                 setActiveTab(item.name);
-                                if (item.name === 'Notifications') {
-                                    navigate('/admin/notifications');
-                                } else {
-                                    navigate('/admin');
-                                }
+                                navigate(item.path);
                             }}
                         >
                             <item.icon size={20} />
@@ -168,7 +175,10 @@ const AdminDashboard = ({ activeTabDefault }) => {
                         <>
                             {/* Stats Overview */}
                             <div className="stats-grid">
-                                <div className="stat-card assigned" onClick={() => setActiveTab('User Management')}>
+                                <div className="stat-card assigned" onClick={() => {
+                                    setActiveTab('User Management');
+                                    navigate('/admin/users');
+                                }}>
                                     <div className="stat-icon">
                                         <Users size={24} />
                                     </div>
@@ -177,7 +187,10 @@ const AdminDashboard = ({ activeTabDefault }) => {
                                         <div className="stat-label">Total Members</div>
                                     </div>
                                 </div>
-                                <div className="stat-card published" onClick={() => setActiveTab('Course Management')}>
+                                <div className="stat-card published" onClick={() => {
+                                    setActiveTab('Course Management');
+                                    navigate('/admin/courses');
+                                }}>
                                     <div className="stat-icon">
                                         <BookOpen size={24} />
                                     </div>
@@ -306,8 +319,18 @@ const AdminDashboard = ({ activeTabDefault }) => {
                         </>
                     )}
 
-                    {activeTab === 'User Management' && <UserManagement onBack={() => setActiveTab('Dashboard')} />}
-                    {activeTab === 'Course Management' && <CourseManagement onBack={() => setActiveTab('Dashboard')} />}
+                    {activeTab === 'User Management' && (
+                        <UserManagement onBack={() => {
+                            setActiveTab('Dashboard');
+                            navigate('/admin');
+                        }} />
+                    )}
+                    {activeTab === 'Course Management' && (
+                        <CourseManagement onBack={() => {
+                            setActiveTab('Dashboard');
+                            navigate('/admin');
+                        }} />
+                    )}
                     {activeTab === 'Notifications' && <NotificationsPage dashboardType="admin" />}
                 </div>
             </div>

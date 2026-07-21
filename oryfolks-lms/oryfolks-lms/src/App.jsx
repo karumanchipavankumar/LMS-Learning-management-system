@@ -59,6 +59,9 @@ function App() {
                     <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                         <Route path="/admin" element={<AdminDashboard />} />
                         <Route path="/admin/notifications" element={<AdminDashboard activeTabDefault="Notifications" />} />
+                        <Route path="/admin/users" element={<AdminDashboard activeTabDefault="User Management" />} />
+                        <Route path="/admin/courses" element={<AdminDashboard activeTabDefault="Course Management" />} />
+                        <Route path="/admin/settings" element={<AdminDashboard activeTabDefault="Settings" />} />
                         <Route path="/admin/add-user" element={<AddUser />} />
                         <Route path="/admin/courses/add" element={<AddCourse />} />
                         <Route path="/admin/all-assigned-courses" element={<AllAssignedCourses />} />

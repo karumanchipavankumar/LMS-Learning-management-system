@@ -389,7 +389,7 @@ const EmployeeDashboard = () => {
                         src={logo}
                         alt="Oryfolks"
                         style={{ height: '40px', cursor: 'pointer' }}
-                        onClick={() => navigate('/employee/dashboard')}
+                        onClick={() => navigate('/employee')}
                     />
                 </div>
 

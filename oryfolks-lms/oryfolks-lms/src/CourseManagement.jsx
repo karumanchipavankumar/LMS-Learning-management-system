@@ -69,13 +69,6 @@ const CourseManagement = ({ onBack }) => {
             </div>
 
             <div className="cm-toolbar">
-                <button
-                    className="cm-new-course-btn"
-                    onClick={() => navigate('/admin/courses/add')}
-                >
-                    + NEW COURSE
-                </button>
-
                 <div className="cm-search-container">
                     <input
                         type="text"
@@ -88,6 +81,13 @@ const CourseManagement = ({ onBack }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
+
+                <button
+                    className="cm-new-course-btn"
+                    onClick={() => navigate('/admin/courses/add')}
+                >
+                    + NEW COURSE
+                </button>
             </div>
 
             <div className="cm-table-container">

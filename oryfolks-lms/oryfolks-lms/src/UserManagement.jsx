@@ -84,7 +84,7 @@ const UserManagement = ({ onBack }) => {
                 Manage all users in one place. Control access, assign roles, and monitor activity across your platform.
             </p>
 
-            <div className="um-filter-bar" style={{ justifyContent: 'center' }}>
+            <div className="um-filter-bar">
                 <div className="cm-search-container">
                     <input
                         type="text"

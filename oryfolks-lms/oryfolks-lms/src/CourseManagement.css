@@ -65,23 +65,17 @@
 /* Toolbar */
 .cm-toolbar {
     display: flex;
-    justify-content: center;
-    /* Center content */
+    justify-content: space-between;
+    /* Space out content */
     align-items: center;
     margin-bottom: 24px;
     position: relative;
-    /* For absolute positioning of buttons */
-    /* flex-wrap: wrap; Removed wrap to enforce structure */
+    flex-wrap: wrap;
+    gap: 16px;
     min-height: 48px;
 }
 
 .cm-new-course-btn {
-    background-color: transparent;
-    /* ... existing styles ... */
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
     background-color: #10B981;
     /* Green color from image */
     color: white;
