@@ -296,6 +296,17 @@
 
 .pagination {
   margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pagination span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  user-select: none;
 }
 
 .pagination-btn {

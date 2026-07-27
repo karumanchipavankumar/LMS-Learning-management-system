@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from './assets/logo.png';
 import API_BASE_URL from './apiConfig';
+import { Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -10,6 +11,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [errors, setErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const validateForm = () => {
@@ -154,15 +156,27 @@ const LoginPage = () => {
 
                         <div className="input-group">
                             <label>Password</label>
-                            <input
-                                type="password"
-                                className={`form-input ${errors.password ? 'error' : ''}`}
-                                value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    setErrors(prev => ({ ...prev, password: '' }));
-                                }}
-                            />
+                            <div className="password-input-wrapper">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className={`form-input ${errors.password ? 'error' : ''}`}
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setErrors(prev => ({ ...prev, password: '' }));
+                                    }}
+                                />
+                                {password && (
+                                    <button 
+                                        type="button" 
+                                        className="password-toggle-btn"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        title={showPassword ? "Hide Password" : "Show Password"}
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                )}
+                            </div>
                             {errors.password && <span className="error-message">{errors.password}</span>}
                         </div>
 

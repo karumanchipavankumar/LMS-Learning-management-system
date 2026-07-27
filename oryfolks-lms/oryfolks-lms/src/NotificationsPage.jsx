@@ -52,8 +52,19 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
             const response = await axios.get(`${API_BASE_URL}/notifications/all?page=${page}&size=10`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(response.data.content);
-            setTotalPages(response.data.totalPages);
+            const data = response.data;
+            if (data.totalPages === 0) {
+                setNotifications([]);
+                setTotalPages(0);
+                if (page !== 0) {
+                    setPage(0);
+                }
+            } else if (page >= data.totalPages) {
+                setPage(data.totalPages - 1);
+            } else {
+                setNotifications(data.content);
+                setTotalPages(data.totalPages);
+            }
         } catch (error) {
             console.error('Error fetching notifications page', error);
         }
@@ -104,7 +115,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
             await axios.delete(`${API_BASE_URL}/notifications/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setNotifications(notifications.filter(n => n.id !== id));
+            await fetchNotifications();
             setSelectedIds(selectedIds.filter(sid => sid !== id));
         } catch (error) {
             console.error('Error deleting notification', error);
@@ -339,11 +350,11 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
                 )}
             </div>
 
-            {totalPages > 1 && (
+            {totalPages > 0 && (
                 <div className="pagination">
                     <button 
                         className="pagination-btn" 
-                        disabled={page === 0} 
+                        disabled={page === 0 || totalPages <= 1} 
                         onClick={() => setPage(page - 1)}
                     >
                         Previous
@@ -351,7 +362,7 @@ const NotificationsPage = ({ dashboardType = 'employee' }) => {
                     <span>Page {page + 1} of {totalPages}</span>
                     <button 
                         className="pagination-btn" 
-                        disabled={page === totalPages - 1} 
+                        disabled={page === totalPages - 1 || totalPages <= 1} 
                         onClick={() => setPage(page + 1)}
                     >
                         Next

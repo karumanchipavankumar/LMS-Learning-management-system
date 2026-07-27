@@ -5,6 +5,7 @@ import API_BASE_URL from './apiConfig';
 import './EmployeeProfile.css';
 import { useData } from './ManagerDashboard';
 import NotificationsPage from './NotificationsPage';
+import { Eye, EyeOff } from 'lucide-react';
 
 const ManagerProfile = () => {
     const navigate = useNavigate();
@@ -36,6 +37,9 @@ const ManagerProfile = () => {
     const [passwordError, setPasswordError] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
     const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -426,37 +430,107 @@ const ManagerProfile = () => {
                             <form onSubmit={handlePasswordChange}>
                                 <div className="form-group" style={{ marginBottom: '20px' }}>
                                     <label className="form-label">Current Password</label>
-                                    <input 
-                                        type="password" 
-                                        className="form-input" 
-                                        value={passwords.currentPassword} 
-                                        onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})} 
-                                        required 
-                                        style={{ backgroundColor: '#f8fafc' }}
-                                    />
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                        <input 
+                                            type={showCurrentPassword ? "text" : "password"} 
+                                            className="form-input" 
+                                            value={passwords.currentPassword} 
+                                            onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})} 
+                                            required 
+                                            style={{ backgroundColor: '#f8fafc', paddingRight: '44px', width: '100%', boxSizing: 'border-box' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '12px',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: '#64748b',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                padding: '4px',
+                                                borderRadius: '4px',
+                                                transition: 'color 0.2s',
+                                            }}
+                                            title={showCurrentPassword ? "Hide Password" : "Show Password"}
+                                        >
+                                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="form-group" style={{ marginBottom: '20px' }}>
                                     <label className="form-label">New Password</label>
-                                    <input 
-                                        type="password" 
-                                        className="form-input" 
-                                        value={passwords.newPassword} 
-                                        onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})} 
-                                        required 
-                                        style={{ backgroundColor: '#f8fafc' }}
-                                    />
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                        <input 
+                                            type={showNewPassword ? "text" : "password"} 
+                                            className="form-input" 
+                                            value={passwords.newPassword} 
+                                            onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})} 
+                                            required 
+                                            style={{ backgroundColor: '#f8fafc', paddingRight: '44px', width: '100%', boxSizing: 'border-box' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '12px',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: '#64748b',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                padding: '4px',
+                                                borderRadius: '4px',
+                                                transition: 'color 0.2s',
+                                            }}
+                                            title={showNewPassword ? "Hide Password" : "Show Password"}
+                                        >
+                                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="form-group" style={{ marginBottom: '25px' }}>
                                     <label className="form-label">Confirm New Password</label>
-                                    <input 
-                                        type="password" 
-                                        className="form-input" 
-                                        value={passwords.confirmNewPassword} 
-                                        onChange={(e) => setPasswords({...passwords, confirmNewPassword: e.target.value})} 
-                                        required 
-                                        style={{ backgroundColor: '#f8fafc' }}
-                                    />
+                                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                        <input 
+                                            type={showConfirmPassword ? "text" : "password"} 
+                                            className="form-input" 
+                                            value={passwords.confirmNewPassword} 
+                                            onChange={(e) => setPasswords({...passwords, confirmNewPassword: e.target.value})} 
+                                            required 
+                                            style={{ backgroundColor: '#f8fafc', paddingRight: '44px', width: '100%', boxSizing: 'border-box' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '12px',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: '#64748b',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                padding: '4px',
+                                                borderRadius: '4px',
+                                                transition: 'color 0.2s',
+                                            }}
+                                            title={showConfirmPassword ? "Hide Password" : "Show Password"}
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
+
                                 
                                 {passwordError && <div className="error-text" style={{ marginBottom: '20px', backgroundColor: '#fef2f2', color: '#b91c1c', padding: '10px', borderRadius: '8px', border: '1px solid #f87171' }}>{passwordError}</div>}
                                 

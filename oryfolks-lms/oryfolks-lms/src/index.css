@@ -58,3 +58,11 @@ body {
 .form-input.error {
     border-color: #ef4444 !important;
 }
+
+/* Hide default browser reveal/clear button in password fields to prevent double eye icons in Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+}

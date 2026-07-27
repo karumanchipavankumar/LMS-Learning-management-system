@@ -3,7 +3,7 @@ import { Routes, Route, NavLink, useNavigate, useParams, Outlet } from 'react-ro
 import {
     LayoutDashboard, Users, BookOpen, Clock,
     ArrowLeft, Bell, Settings, LogOut, CheckCircle, Search, FileText,
-    Mail, Activity, Trash2, User
+    Mail, Activity, Trash2, User, Menu, X
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
@@ -149,8 +149,9 @@ const DataProvider = ({ children }) => {
 };
 // --- Components ---
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const { unreadCounts } = useData();
+    const navigate = useNavigate();
 
     // Note: Paths are relative to the parent route /manager
     const menuItems = [
@@ -163,13 +164,26 @@ const Sidebar = () => {
     ];
 
     return (
-        <div className="sidebar">
+        <div className={`sidebar ${isOpen ? 'open' : ''}`}>
             <div 
                 className="sidebar-header" 
-                onClick={() => navigate('/manager')} 
-                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                    navigate('/manager');
+                    if (onClose) onClose();
+                }} 
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', boxSizing: 'border-box' }}
             >
                 <img src={logo} alt="ORYFOLKS" style={{ height: '40px', width: 'auto' }} />
+                <button 
+                    className="sidebar-close-btn" 
+                    onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (onClose) onClose(); 
+                    }} 
+                    title="Close Menu"
+                >
+                    <X size={20} />
+                </button>
             </div>
 
             <nav className="sidebar-nav">
@@ -180,6 +194,7 @@ const Sidebar = () => {
                                 to={item.path}
                                 end={item.end}
                                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                                onClick={onClose}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                                     <item.icon size={20} />
@@ -197,7 +212,7 @@ const Sidebar = () => {
     );
 };
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const { managerProfile } = useData();
 
@@ -221,7 +236,10 @@ const Header = () => {
 
     return (
         <header className="app-header">
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button className="sidebar-toggle-btn" onClick={toggleSidebar} title="Open Menu">
+                    <Menu size={24} />
+                </button>
                 <h1 className="header-title">Welcome, {firstName}!</h1>
             </div>
             <div className="header-actions">
@@ -745,16 +763,25 @@ const InactiveCoursesPage = () => {
 };
 
 const ManagerLayout = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+    const closeSidebar = () => setIsSidebarOpen(false);
+
     return (
         <div className="app-layout">
-            <Sidebar />
+            <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+
+            {isSidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar}></div>}
 
             <div className="main-content">
-                <Header />
+                <div className="main-container">
+                    <Header toggleSidebar={toggleSidebar} />
 
-                <main className="content-scrollable">
-                    <Outlet />
-                </main>
+                    <main className="content-scrollable">
+                        <Outlet />
+                    </main>
+                </div>
             </div>
         </div>
     );
@@ -875,7 +902,7 @@ const MyTeam = () => {
 
     return (
         <div className="user-management-container">
-            <div className="team-header" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
+            <div className="team-header">
                 <div>
                     <h1 className="team-title" style={{ fontSize: '1.25rem', marginBottom: '0.1rem' }}>My Team</h1>
                     <p className="team-subtitle" style={{ fontSize: '0.75rem', margin: 0 }}>
@@ -1206,7 +1233,7 @@ const CourseManagement = () => {
 
     return (
         <div className="user-management-container">
-            <div className="team-header" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
+            <div className="team-header">
                 <div>
                     <h1 className="team-title" style={{ fontSize: '1.25rem', marginBottom: '0.1rem' }}>Assign Courses</h1>
                     <p className="team-subtitle" style={{ fontSize: '0.75rem', margin: 0 }}>
@@ -1383,7 +1410,7 @@ const CourseAssignment = () => {
 
     return (
         <div className="user-management-container" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div className="team-header" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
+            <div className="team-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <ArrowLeft className="team-back-btn" onClick={() => navigate('/manager/course-management')} />
                     <div>
@@ -1613,31 +1640,29 @@ const CourseEnrollments = () => {
 
     return (
         <div className="user-management-container">
-            <div className="team-header" style={{ padding: '0.8rem 1.5rem', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h1 className="team-title" style={{ fontSize: '1.25rem', marginBottom: '0.1rem' }}>Course Enrollment Requests</h1>
-                        <p className="team-subtitle" style={{ fontSize: '0.75rem', margin: 0 }}>
-                            Manage course enrollment requests from employees.
-                        </p>
-                    </div>
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid #d1d5db',
-                            fontSize: '14px',
-                            outline: 'none'
-                        }}
-                    >
-                        <option value="PENDING">Pending</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="REJECTED">Rejected</option>
-                        <option value="ALL">All</option>
-                    </select>
+            <div className="team-header">
+                <div>
+                    <h1 className="team-title" style={{ fontSize: '1.25rem', marginBottom: '0.1rem' }}>Course Enrollment Requests</h1>
+                    <p className="team-subtitle" style={{ fontSize: '0.75rem', margin: 0 }}>
+                        Manage course enrollment requests from employees.
+                    </p>
                 </div>
+                <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #d1d5db',
+                        fontSize: '14px',
+                        outline: 'none'
+                    }}
+                >
+                    <option value="PENDING">Pending</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="ALL">All</option>
+                </select>
             </div>
 
             <div className="table-container">
