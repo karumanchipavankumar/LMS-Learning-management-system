@@ -3,6 +3,5 @@ target/
 .mvn/
 *.log
 *.txt
-.env
 Dockerfile
 .dockerignore

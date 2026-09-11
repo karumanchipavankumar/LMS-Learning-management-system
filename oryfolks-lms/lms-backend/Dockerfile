@@ -16,6 +16,7 @@ WORKDIR /app
 
 # Copy the built jar from the build stage
 COPY --from=build /app/target/lms-backend-0.0.1-SNAPSHOT.jar app.jar
+COPY .env .env
 
 # Expose port 8080
 EXPOSE 8080
