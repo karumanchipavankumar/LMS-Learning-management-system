@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import API_BASE_URL from './apiConfig';
+import API_BASE_URL, { getMediaUrl } from './apiConfig';
 import { ArrowLeft, Clock, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import './EmployeeDashboard.css'; // Reusing dashboard styles
 import logo from './assets/logo.png';
@@ -125,7 +125,7 @@ const MyLearning = () => {
                                         {assignedCourses.filter(c => c.enrollmentType !== 'SELF_ENROLLMENT').map(course => (
                                             <div key={course.id} className="employee-course-card" onClick={() => navigate(`/course/${course.id}`, { state: { from: '/employee/my-learning' } })}>
                                                 <div className="employee-course-image-container">
-                                                    <img src={course.thumbnailUrl} alt={course.title} className="employee-course-image" />
+                                                    <img src={getMediaUrl(course.thumbnailUrl)} alt={course.title} className="employee-course-image" />
                                                     {/* Progress Badge */}
                                                     <div className={`employee-progress-badge ${course.progress === 100 ? 'completed' : ''}`}>
                                                         {course.progress === 100 ? 'Completed' : `${course.progress}%`}
@@ -215,7 +215,7 @@ const MyLearning = () => {
                                         {assignedCourses.filter(c => c.enrollmentType === 'SELF_ENROLLMENT').map(course => (
                                             <div key={course.id} className="employee-course-card" onClick={() => navigate(`/course/${course.id}`, { state: { from: '/employee/my-learning' } })}>
                                                 <div className="employee-course-image-container">
-                                                    <img src={course.thumbnailUrl} alt={course.title} className="employee-course-image" />
+                                                    <img src={getMediaUrl(course.thumbnailUrl)} alt={course.title} className="employee-course-image" />
                                                     {/* Progress Badge */}
                                                     <div className={`employee-progress-badge ${course.progress === 100 ? 'completed' : ''}`}>
                                                         {course.progress === 100 ? 'Completed' : `${course.progress}%`}
@@ -291,7 +291,7 @@ const MyLearning = () => {
                                 {enrollmentHistory.map(course => (
                                     <div key={course.id} className="employee-course-card" style={{ cursor: 'default' }}>
                                         <div className="employee-course-image-container">
-                                            <img src={course.thumbnailUrl || 'https://via.placeholder.com/300x160?text=No+Image'} alt={course.courseName} className="employee-course-image" />
+                                            <img src={getMediaUrl(course.thumbnailUrl) || 'https://via.placeholder.com/300x160?text=No+Image'} alt={course.courseName} className="employee-course-image" />
                                             <div className="employee-progress-badge" style={{
                                                 backgroundColor: course.status === 'APPROVED' ? '#22c55e' : course.status === 'REJECTED' ? '#ef4444' : '#f59e0b',
                                                 color: 'white',

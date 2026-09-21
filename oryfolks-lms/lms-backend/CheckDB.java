@@ -5,7 +5,7 @@ import java.sql.Statement;
 
 public class CheckDB {
     public static void main(String[] args) {
-        String url = "jdbc:postgresql://ep-lucky-feather-a1v13ac4-pooler.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_4jiJnbHvIxZ6&sslmode=require&channelBinding=require";
+        String url = "jdbc:postgresql://ep-empty-leaf-az85xz9a-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_uOJlndhE9Dy7&sslmode=require&channelBinding=require";
         try {
             Connection conn = DriverManager.getConnection(url);
             Statement stmt = conn.createStatement();

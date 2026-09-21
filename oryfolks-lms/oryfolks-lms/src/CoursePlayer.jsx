@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import axios from 'axios'; // Import axios
-import API_BASE_URL from './apiConfig';
+import { jwtDecode } from 'jwt-decode';
+import API_BASE_URL, { getMediaUrl } from './apiConfig';
 import './CoursePlayer.css';
 import logo from './assets/logo.png';
 
@@ -249,9 +250,14 @@ const CoursePlayer = () => {
 
         try {
 
-            const decodedToken = JSON.parse(
-                atob(token.split('.')[1])
-            );
+            let decodedToken;
+            try {
+                decodedToken = jwtDecode(token);
+            } catch (e) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                decodedToken = JSON.parse(window.atob(base64));
+            }
 
             console.log(decodedToken);
 
@@ -398,10 +404,15 @@ const CoursePlayer = () => {
 
         try {
 
-            // Decode JWT token
-            const decodedToken = JSON.parse(
-                atob(token.split('.')[1])
-            );
+            // Decode JWT token safely
+            let decodedToken;
+            try {
+                decodedToken = jwtDecode(token);
+            } catch (e) {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                decodedToken = JSON.parse(window.atob(base64));
+            }
 
             // Extract logged-in employee id
             const userId = decodedToken.userId;
@@ -554,7 +565,7 @@ const CoursePlayer = () => {
                         {course.videoUrl ? (
                             <video
                                 ref={videoRef}
-                                src={course.videoUrl}
+                                src={getMediaUrl(course.videoUrl)}
                                 controls
                                 controlsList="nodownload"
                                 onContextMenu={(e) => e.preventDefault()}

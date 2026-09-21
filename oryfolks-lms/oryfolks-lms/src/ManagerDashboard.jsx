@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
-import API_BASE_URL from './apiConfig';
+import API_BASE_URL, { getMediaUrl } from './apiConfig';
 import './ManagerDashboard.css';
 import './CourseManagement.css'; // Import shared styles for pill search
 import logo from './assets/logo.png';
@@ -1095,7 +1095,7 @@ const TeamMemberDetails = () => {
                         <div key={course.id || course.courseId} className="employee-course-card">
                             <div className="employee-course-image-container">
                                 <img
-                                    src={course.thumbnailUrl || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60"}
+                                    src={getMediaUrl(course.thumbnailUrl) || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=60"}
                                     alt={course.courseName || course.title}
                                     className="employee-course-image"
                                 />

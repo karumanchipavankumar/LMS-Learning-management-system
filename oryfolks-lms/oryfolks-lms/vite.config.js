@@ -6,6 +6,12 @@ export default defineConfig({
     plugins: [react()],
     server: {
         host: true,
-        port: 5173
+        port: 5173,
+        proxy: {
+            '/lms-videos': {
+                target: 'http://49.205.66.47:9000',
+                changeOrigin: true
+            }
+        }
     }
 })

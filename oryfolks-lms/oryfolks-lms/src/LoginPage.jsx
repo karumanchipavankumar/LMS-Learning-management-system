@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from './assets/logo.png';
 import API_BASE_URL from './apiConfig';
+import { jwtDecode } from 'jwt-decode';
 import { Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
 
@@ -59,9 +60,18 @@ const LoginPage = () => {
 
             localStorage.setItem('token', token);
 
-            // Decode JWT
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const role = payload.role.replace('ROLE_', '');
+            // Decode JWT safely
+            let payload;
+            try {
+                payload = jwtDecode(token);
+            } catch (err) {
+                console.error("JWT decode error:", err);
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                payload = JSON.parse(window.atob(base64));
+            }
+            const rawRole = payload.role || payload.roles || '';
+            const role = (typeof rawRole === 'string' ? rawRole : (Array.isArray(rawRole) ? rawRole[0] : '')).replace('ROLE_', '');
 
             // Admin login → ONLY admin allowed
             if (loginType === 'ADMIN' && role !== 'ADMIN') {

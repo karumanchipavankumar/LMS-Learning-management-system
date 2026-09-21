@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 const ProtectedRoute = ({ allowedRoles }) => {
     const token = localStorage.getItem('token');
@@ -9,10 +10,17 @@ const ProtectedRoute = ({ allowedRoles }) => {
     }
 
     try {
-        // Decode JWT payload manually to avoid extra dependencies if not needed, 
-        // but consistently with LoginPage
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role.replace('ROLE_', '');
+        let payload;
+        try {
+            payload = jwtDecode(token);
+        } catch (e) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            payload = JSON.parse(window.atob(base64));
+        }
+
+        const rawRole = payload.role || payload.roles || '';
+        const userRole = (typeof rawRole === 'string' ? rawRole : (Array.isArray(rawRole) ? rawRole[0] : '')).replace('ROLE_', '');
 
         if (allowedRoles.includes(userRole)) {
             return <Outlet />;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import API_BASE_URL from './apiConfig';
+import API_BASE_URL, { getMediaUrl } from './apiConfig';
 import { Search, CheckCircle, Clock } from 'lucide-react';
 import './EmployeeDashboard.css';
 import logo from './assets/logo.png';
@@ -137,7 +137,7 @@ const EmployeeDashboard = () => {
                 <div className="modal-content">
                     <div className="modal-header-image">
                         {selectedCourse.thumbnailUrl ? (
-                            <img src={selectedCourse.thumbnailUrl} alt={selectedCourse.title} />
+                            <img src={getMediaUrl(selectedCourse.thumbnailUrl)} alt={selectedCourse.title} />
                         ) : (
                             <div className="modal-header-placeholder"></div>
                         )}
@@ -213,7 +213,7 @@ const EmployeeDashboard = () => {
                 {/* ... rest of card content ... */}
                 <div className="employee-course-image-container">
                     <img
-                        src={course.thumbnailUrl}
+                        src={getMediaUrl(course.thumbnailUrl)}
                         alt={course.title}
                         className="employee-course-image"
                     />

@@ -18,6 +18,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -42,10 +44,24 @@ public class SecurityConfig {
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
-                        .requestMatchers("/admin/**", "/api/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/manager/**", "/api/manager/**").hasAuthority("MANAGER")
-                        .requestMatchers("/employee/**", "/api/employee/**").hasAuthority("EMPLOYEE")
+                        .requestMatchers(
+                                AntPathRequestMatcher.antMatcher("/auth/**"),
+                                AntPathRequestMatcher.antMatcher("/**/auth/**"),
+                                AntPathRequestMatcher.antMatcher("/media/**"),
+                                AntPathRequestMatcher.antMatcher("/**/media/**")
+                        ).permitAll()
+                        .requestMatchers(
+                                AntPathRequestMatcher.antMatcher("/admin/**"),
+                                AntPathRequestMatcher.antMatcher("/**/admin/**")
+                        ).hasAuthority("ADMIN")
+                        .requestMatchers(
+                                AntPathRequestMatcher.antMatcher("/manager/**"),
+                                AntPathRequestMatcher.antMatcher("/**/manager/**")
+                        ).hasAuthority("MANAGER")
+                        .requestMatchers(
+                                AntPathRequestMatcher.antMatcher("/employee/**"),
+                                AntPathRequestMatcher.antMatcher("/**/employee/**")
+                        ).hasAuthority("EMPLOYEE")
                         .anyRequest().authenticated())
 
                 // Stateless session
